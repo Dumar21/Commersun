@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fondo y superficies */
+  --color-background: #0b0e13;
+  --color-surface: #141a22;
+  --color-surface-2: #1b222c;
+  --color-ink: #edeff2;
+  --color-muted: #8d98a6;
+  --color-border: #262e38;
+
+  /* Marca: el cian/turquesa del logo */
+  --color-primary: #17a9c4;
+  --color-primary-bright: #33c7e0;
+  --color-primary-dark: #0c7386;
+
+  /* SUN: magenta del logo */
+  --color-accent: #8C2A77;
+  --color-accent-bright: #b2439a;
+  --color-accent-dark: #5e1a50;
+
+  --color-danger: #e5484d;
+
+  --radius-card: 0.75rem;
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-ink font-sans;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply flex min-h-screen flex-col md:flex-row;
+  }
+
+  .app-nav {
+    @apply fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-border bg-surface/95 px-2 py-2 backdrop-blur-md
+           md:sticky md:top-0 md:h-screen md:w-64 md:min-h-screen md:flex-col md:items-stretch md:justify-start md:overflow-y-auto md:border-t-0 md:border-r md:px-4 md:py-6;
+  }
+
+  .app-nav-brand {
+    @apply hidden md:flex items-center gap-2 mb-8 px-2;
+  }
+
+  .app-nav-title {
+    @apply font-display text-lg tracking-tight flex items-baseline gap-0.5;
+  }
+
+  .brand-commer {
+    color: var(--color-primary-bright);
+    -webkit-text-stroke: 0.5px var(--color-primary-dark);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  }
+
+  .brand-sun {
+    color: var(--color-accent-bright);
+    -webkit-text-stroke: 0.5px var(--color-accent-dark);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+
+  .app-nav-links {
+    @apply flex w-full gap-1 md:flex-col;
+  }
+
+  .app-nav-link {
+    @apply block rounded-card px-3 py-2 text-center text-sm font-medium text-muted transition-colors
+           hover:bg-white/5 hover:text-ink md:text-left;
+  }
+
+  .app-main {
+    @apply order-1 flex-1 bg-background px-4 py-6 pb-24 md:order-2 md:px-8 md:py-8 md:pb-10;
+  }
+
+  .barcode-mark {
+    @apply inline-block h-5 w-4;
+    background-image: repeating-linear-gradient(
+      to right, var(--color-primary) 0px, var(--color-primary) 2px, transparent 2px, transparent 4px
+    );
+  }
+
+  .card {
+    @apply rounded-card border border-border bg-surface p-6 shadow-[0_20px_40px_rgba(0,0,0,0.16)];
+  }
+
+  .field-label {
+    @apply mb-1 block text-sm font-medium text-muted;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink transition
+           placeholder:text-muted focus:border-primary-bright focus:outline-none focus:ring-2 focus:ring-primary-bright/30;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white
+           transition-colors hover:bg-primary-dark disabled:opacity-50;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white
+           transition hover:brightness-110 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-surface disabled:opacity-50;
+  }
+
+  .scanner-overlay {
+    @apply fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/80 p-4;
+  }
+
+  .scanner-viewport {
+    @apply w-full max-w-sm overflow-hidden rounded-card border-4 border-accent;
+  }
+}
