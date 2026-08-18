@@ -1,6 +1,6 @@
 // src/components/layout/Nav.tsx
-import Link from 'next/link'
 import { obtenerSesion } from '@/lib/auth-server'
+import NavLinks from './NavLinks'
 
 const LINKS_POR_ROL: Record<string, { href: string; label: string }[]> = {
   super_admin: [{ href: '/usuarios', label: 'Usuarios' }],
@@ -31,13 +31,41 @@ export default async function Nav() {
           <span className="brand-sun">SUN</span>
         </span>
       </div>
-      <ul className="app-nav-links">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link href={link.href} className="app-nav-link">{link.label}</Link>
-          </li>
-        ))}
-      </ul>
+
+      <div className="flex items-stretch md:flex-1 md:flex-col">
+        <NavLinks links={links} />
+
+        {/* Logout: icono suelto al final de la fila en mobile, botón completo abajo en desktop */}
+        <form action="/logout" method="post" className="app-nav-logout-mobile">
+          <button
+            type="submit"
+            className="app-nav-link w-full text-danger hover:bg-danger/10 hover:text-danger"
+          >
+            <span className="app-nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span>Salir</span>
+          </button>
+        </form>
+      </div>
+
+      <form action="/logout" method="post" className="app-nav-logout">
+        <button
+          type="submit"
+          className="app-nav-link w-full border border-border bg-surface-2 text-danger hover:bg-danger/10 hover:text-danger"
+        >
+          <span className="app-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span>Cerrar sesión</span>
+        </button>
+      </form>
     </nav>
   )
 }
