@@ -11,6 +11,14 @@ const RUTAS_POR_ROL: Record<string, string> = {
   bodegero: '/productos',
 }
 
+const ETIQUETAS_ROL: Record<string, string> = {
+  super_admin: 'Admin',
+  dueno: 'Dueño',
+  vendedor: 'Vendedor',
+  cajero: 'Cajero',
+  bodegero: 'Bodega',
+}
+
 type Usuario = {
   id: string
   nombre: string
@@ -103,76 +111,157 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="card w-full max-w-xs flex flex-col items-center gap-6">
-        <h1 className="text-xl font-display font-bold text-ink">
-          {usuarioSeleccionado ? 'Ingresa tu PIN' : 'Selecciona tu usuario'}
-        </h1>
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-background p-6 font-sans">
+      <div className="w-full max-w-xs animate-[fadeIn_0.4s_ease-out]">
+        {/* filo perforado tipo recibo */}
+        <div
+          className="h-3 rounded-t-sm"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, var(--color-background) 2.5px, var(--color-border) 2.5px)',
+            backgroundSize: '10px 10px',
+            backgroundPosition: 'top center',
+          }}
+        />
 
-        {!usuarioSeleccionado ? (
-          <div className="w-full space-y-2">
-            {usuarios.length === 0 ? (
-              <p className="text-sm text-muted">No hay usuarios activos.</p>
-            ) : (
-              usuarios.map((usuario) => (
-                <button
-                  key={usuario.id}
-                  type="button"
-                  className="btn-secondary w-full justify-between"
-                  disabled={cargando}
-                  onClick={() => {
-                    setUsuarioSeleccionado(usuario)
-                    setError('')
-                    setPin('')
+        <div className="rounded-b-2xl border border-border bg-surface bg-[radial-gradient(circle_at_top_left,_rgba(51,199,224,0.16),transparent_45%)] px-6 pb-6 pt-5 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.7)]">
+          <div className="mb-6 text-center">
+            <p className="text-[10px] font-display uppercase tracking-[0.35em] text-accent-bright">
+              Commersun · Terminal
+            </p>
+            <h1 className="mt-1 text-lg font-extrabold text-ink">
+              {usuarioSeleccionado ? 'Ingresa tu PIN' : 'Selecciona tu usuario'}
+            </h1>
+          </div>
+
+          {!usuarioSeleccionado ? (
+            <div className="space-y-2">
+              {usuarios.length === 0 ? (
+                <p className="text-center text-sm text-muted">No hay usuarios activos.</p>
+              ) : (
+                usuarios.map((usuario) => (
+                  <button
+                    key={usuario.id}
+                    type="button"
+                    disabled={cargando}
+                    onClick={() => {
+                      setUsuarioSeleccionado(usuario)
+                      setError('')
+                      setPin('')
+                    }}
+                    className="group flex w-full items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3 text-left transition hover:border-primary-bright/50 disabled:opacity-40"
+                  >
+                    <span className="text-sm font-semibold text-ink">{usuario.nombre}</span>
+                    <span className="text-[10px] font-display uppercase tracking-widest text-muted transition group-hover:text-primary-bright">
+                      {ETIQUETAS_ROL[usuario.rol] ?? usuario.rol}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-6">
+              <div className="text-center">
+                <p className="text-xs text-muted">Accediendo como</p>
+                <p className="text-base font-bold text-ink">{usuarioSeleccionado.nombre}</p>
+              </div>
+
+              {/* visor LED del PIN */}
+              <div className="relative w-full overflow-hidden rounded-md border border-border bg-background px-4 py-5">
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.07]"
+                  style={{
+                    backgroundImage:
+                      'repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)',
                   }}
-                >
-                  <span>{usuario.nombre}</span>
-                  <span className="text-xs uppercase tracking-wide text-muted">{usuario.rol}</span>
-                </button>
-              ))
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col items-center gap-2 text-center">
-              <p className="text-sm text-muted">Accediendo como</p>
-              <p className="text-lg font-semibold text-ink">{usuarioSeleccionado.nombre}</p>
-            </div>
-
-            <div className="flex gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <span
-                  key={i}
-                  className={`h-3 w-3 rounded-full border border-primary-bright ${
-                    i < pin.length ? 'bg-primary-bright' : 'bg-transparent'
-                  }`}
                 />
-              ))}
+                <div className="relative flex justify-center gap-3">
+                  {[0, 1, 2, 3].map((i) => {
+                    const activo = i < pin.length
+                    return (
+                      <div
+                        key={i}
+                        className={`h-8 w-6 rounded-[3px] border transition-all duration-150 ${
+                          activo
+                            ? 'border-primary-bright bg-primary-bright shadow-[0_0_14px_2px_rgba(51,199,224,0.65)]'
+                            : 'border-border bg-transparent'
+                        }`}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    disabled={cargando}
+                    onClick={() => manejarDigito(n)}
+                    className="h-14 w-14 rounded-lg border border-border bg-surface-2 font-display text-lg font-bold text-ink transition active:translate-y-0.5 active:border-primary-bright/60 disabled:opacity-40"
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setPin((p) => p.slice(0, -1))}
+                  disabled={cargando}
+                  className="h-14 w-14 rounded-lg border border-border bg-surface-2 text-xs font-semibold text-muted transition active:translate-y-0.5 disabled:opacity-40"
+                >
+                  Borrar
+                </button>
+                <button
+                  type="button"
+                  disabled={cargando}
+                  onClick={() => manejarDigito('0')}
+                  className="h-14 w-14 rounded-lg border border-border bg-surface-2 font-display text-lg font-bold text-ink transition active:translate-y-0.5 active:border-primary-bright/60 disabled:opacity-40"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={resetearSeleccion}
+                  disabled={cargando}
+                  className="h-14 w-14 rounded-lg border border-border bg-surface-2 text-xs font-semibold text-muted transition active:translate-y-0.5 disabled:opacity-40"
+                >
+                  Volver
+                </button>
+              </div>
             </div>
-          </>
-        )}
+          )}
 
-        {error && <p className="text-danger text-sm">{error}</p>}
+          {cargando && (
+            <p className="mt-4 animate-pulse text-center text-[11px] font-display uppercase tracking-widest text-primary-bright">
+              Verificando…
+            </p>
+          )}
 
-        {usuarioSeleccionado && (
-          <div className="grid grid-cols-3 gap-3">
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((n) => (
-              <button key={n} type="button" disabled={cargando} onClick={() => manejarDigito(n)} className="btn-secondary h-14 w-14 text-lg">
-                {n}
-              </button>
-            ))}
-            <button type="button" onClick={() => setPin((p) => p.slice(0, -1))} disabled={cargando} className="btn-secondary h-14 w-14 text-sm">
-              Borrar
-            </button>
-            <button type="button" disabled={cargando} onClick={() => manejarDigito('0')} className="btn-secondary h-14 w-14 text-lg">
-              0
-            </button>
-            <button type="button" onClick={() => resetearSeleccion()} disabled={cargando} className="btn-secondary h-14 w-14 text-sm">
-              Volver
-            </button>
-          </div>
-        )}
+          {error && !cargando && (
+            <p className="mt-4 text-center text-xs text-danger">{error}</p>
+          )}
+        </div>
       </div>
+
+      <style jsx global>{`
+        html,
+        body {
+          overflow: hidden;
+          overscroll-behavior: none;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(6px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
     </div>
   )
 }
