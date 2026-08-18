@@ -7,7 +7,7 @@ const sora = Sora({ subsets: ['latin'], variable: '--font-sora', weight: ['600',
 const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', weight: ['400', '500', '600', '700'] })
 
 export const metadata: Metadata = {
-  title: 'Caja Navidad',
+  title: 'Commersun',
   description: 'Sistema de flujo de caja e inventario',
 }
 
