@@ -17,8 +17,9 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-muted">Inventario</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-primary-bright">Inventario</p>
         <h1 className="text-2xl font-display font-bold text-ink">Editar producto</h1>
+        <p className="text-sm text-muted">{producto.nombre}</p>
       </div>
       <FormularioProducto producto={producto} />
     </div>
