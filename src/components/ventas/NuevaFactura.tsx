@@ -51,14 +51,6 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (buscadorAbierto) {
-      // Autofocus al abrir + reset del texto de búsqueda
-      setBusqueda('')
-      requestAnimationFrame(() => inputRef.current?.focus())
-    }
-  }, [buscadorAbierto])
-
-  useEffect(() => {
     if (!buscadorAbierto) return
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setBuscadorAbierto(false)
@@ -181,7 +173,11 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
             {/* Disparador del buscador: ya no empuja contenido, abre el modal */}
             <button
               type="button"
-              onClick={() => setBuscadorAbierto(true)}
+              onClick={() => {
+                setBusqueda('')
+                setBuscadorAbierto(true)
+                requestAnimationFrame(() => inputRef.current?.focus())
+              }}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-2/80 px-4 py-3 text-left text-muted transition hover:border-primary-bright/60 hover:bg-surface"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
