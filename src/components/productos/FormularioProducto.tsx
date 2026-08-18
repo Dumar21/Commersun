@@ -1,4 +1,3 @@
-// src/components/productos/FormularioProducto.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -27,11 +26,13 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
   const [imagenPreview, setImagenPreview] = useState(producto?.imagen_url ?? '')
   const [imagenBase64, setImagenBase64] = useState('')
   const [imagenNombre, setImagenNombre] = useState('')
+  const [arrastrandoImagen, setArrastrandoImagen] = useState(false)
   const [escaneando, setEscaneando] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const bufferRef = useRef('')
   const lastKeyTimeRef = useRef(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -69,10 +70,8 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
     }
   }, [])
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const archivo = event.target.files?.[0]
+  const leerArchivo = (archivo?: File | null) => {
     if (!archivo) return
-
     const reader = new FileReader()
     reader.onload = () => {
       const resultado = typeof reader.result === 'string' ? reader.result : ''
@@ -81,6 +80,16 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
       setImagenNombre(archivo.name)
     }
     reader.readAsDataURL(archivo)
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    leerArchivo(event.target.files?.[0])
+  }
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setArrastrandoImagen(false)
+    leerArchivo(event.dataTransfer.files?.[0])
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,58 +131,143 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="card max-w-2xl flex flex-col gap-5">
-        <div className="grid gap-5 md:grid-cols-[1fr_220px]">
-          <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="card flex flex-col gap-6 bg-[radial-gradient(circle_at_top_right,_rgba(140,42,119,0.16),transparent_45%)]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+          {/* Columna de datos */}
+          <div className="space-y-5">
             <div>
               <label className="field-label">Nombre del producto</label>
-              <input type="text" className="field-input" placeholder="Ej: Luces LED 10m multicolor" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+              <input
+                type="text"
+                className="field-input"
+                placeholder="Ej: Luces LED 10m multicolor"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                required
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="field-label">Precio al detal</label>
-                <input type="number" className="field-input" placeholder="0" value={precioDetal} onChange={(e) => setPrecioDetal(e.target.value)} required />
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">$</span>
+                  <input
+                    type="number"
+                    className="field-input pl-6"
+                    placeholder="0"
+                    value={precioDetal}
+                    onChange={(e) => setPrecioDetal(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               <div>
                 <label className="field-label">Precio al por mayor</label>
-                <input type="number" className="field-input" placeholder="0" value={precioMayor} onChange={(e) => setPrecioMayor(e.target.value)} required />
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">$</span>
+                  <input
+                    type="number"
+                    className="field-input pl-6"
+                    placeholder="0"
+                    value={precioMayor}
+                    onChange={(e) => setPrecioMayor(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
             </div>
 
             <div>
               <label className="field-label">Stock</label>
-              <input type="number" min="0" className="field-input" value={stockInicial} onChange={(e) => setStockInicial(e.target.value)} />
+              <input
+                type="number"
+                min="0"
+                className="field-input sm:max-w-[160px]"
+                value={stockInicial}
+                onChange={(e) => setStockInicial(e.target.value)}
+              />
             </div>
 
             <div>
               <label className="field-label">Código de barras</label>
-              <div className="flex flex-col gap-2">
-                <input type="text" className="field-input" placeholder="Escanea o escribe el código" value={codigoBarras} onChange={(e) => setCodigoBarras(e.target.value)} required />
-                <button type="button" onClick={() => setEscaneando(true)} className="btn-accent whitespace-nowrap self-start">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  className="field-input"
+                  placeholder="Escanea o escribe el código"
+                  value={codigoBarras}
+                  onChange={(e) => setCodigoBarras(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setEscaneando(true)}
+                  className="btn-accent shrink-0 whitespace-nowrap"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
+                    <rect x="3" y="4" width="14" height="12" rx="1.5" />
+                    <path d="M6 4v12M9 4v12M13 4v12" strokeLinecap="round" />
+                  </svg>
                   Escanear
                 </button>
               </div>
             </div>
           </div>
 
+          {/* Columna de imagen */}
           <div className="space-y-3">
             <label className="field-label">Foto del producto</label>
-            <div className="flex min-h-[220px] items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-2">
+
+            <div
+              onDragOver={(e) => {
+                e.preventDefault()
+                setArrastrandoImagen(true)
+              }}
+              onDragLeave={() => setArrastrandoImagen(false)}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed transition ${
+                arrastrandoImagen
+                  ? 'border-primary-bright bg-primary/10'
+                  : 'border-border bg-surface-2 hover:border-primary-bright/60 hover:bg-surface'
+              }`}
+            >
               {imagenPreview ? (
-                <img src={imagenPreview} alt="Vista previa del producto" className="h-full w-full object-cover" />
+                <>
+                  <img src={imagenPreview} alt="Vista previa del producto" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/50 group-hover:opacity-100">
+                    <span className="rounded-lg border border-white/30 bg-black/40 px-3 py-1.5 text-xs font-semibold text-white">
+                      Cambiar foto
+                    </span>
+                  </div>
+                </>
               ) : (
-                <div className="px-4 text-center text-sm text-muted">Sin imagen aún</div>
+                <div className="flex flex-col items-center gap-2 px-4 text-center">
+                  <svg className="h-8 w-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="8.5" cy="10.5" r="1.5" />
+                    <path d="m21 15-5-5-4 4-2-2-5 5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <p className="text-sm font-medium text-ink">Sube una foto</p>
+                  <p className="text-xs text-muted">Arrastra o haz clic · galería o cámara en móvil</p>
+                </div>
               )}
             </div>
-            <input type="file" accept="image/*" onChange={handleFileChange} className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white" />
-            <p className="text-xs text-muted">Puedes subir una foto desde galería o cámara en móvil.</p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </div>
 
         {error && <p className="text-danger text-sm">{error}</p>}
 
-        <button type="submit" className="btn-primary mt-2" disabled={guardando}>
+        <button type="submit" className="btn-primary self-start px-8" disabled={guardando}>
           {guardando ? 'Guardando...' : producto?.id ? 'Actualizar producto' : 'Guardar producto'}
         </button>
       </form>
