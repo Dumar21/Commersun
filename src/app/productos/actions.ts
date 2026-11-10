@@ -4,6 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { obtenerSesion } from '@/lib/auth-server'
+import type { Database } from '@/lib/database.types'
 
 async function subirImagenProductoDesdeBase64(imagenBase64?: string, nombreArchivo?: string) {
   if (!imagenBase64) return null
@@ -104,6 +105,10 @@ export async function crearProducto(datos: {
   return { ok: true }
 }
 
+type ResultadoActualizacion =
+  | { ok: true; pendienteAprobacion?: boolean }
+  | { error: string }
+
 export async function actualizarProducto(productoId: string, datos: {
   nombre: string
   precioDetal: number
@@ -112,21 +117,35 @@ export async function actualizarProducto(productoId: string, datos: {
   stock: number
   imagenBase64?: string
   imagenNombre?: string
-}) {
+}): Promise<ResultadoActualizacion> {
   const sesion = await obtenerSesion()
   if (!sesion || (sesion.rol !== 'bodegero' && sesion.rol !== 'dueno')) {
     return { error: 'No autorizado' }
   }
 
-  let imagenUrl: string | null = null
+  const { data: productoActual, error: errorProducto } = await supabaseAdmin
+    .from('productos')
+    .select('nombre, precio_detal, precio_mayor, codigo_barras, stock, imagen_url')
+    .eq('id', productoId)
+    .single()
+
+  if (errorProducto || !productoActual) {
+    return { error: 'Producto no encontrado' }
+  }
+
+  let imagenUrl: string | null = productoActual.imagen_url ?? null
 
   try {
-    imagenUrl = await subirImagenProductoDesdeBase64(datos.imagenBase64, datos.imagenNombre)
+    const nuevaImagenUrl = await subirImagenProductoDesdeBase64(datos.imagenBase64, datos.imagenNombre)
+    if (nuevaImagenUrl) {
+      imagenUrl = nuevaImagenUrl
+    }
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'No se pudo guardar la imagen del producto' }
   }
 
-  const payload: Record<string, unknown> = {
+  const cambiosPendientes: Array<{ campo: string; valor_anterior: string | number | null; valor_nuevo: string | number | null }> = []
+  const camposAActualizar: Database['public']['Tables']['productos']['Update'] = {
     nombre: datos.nombre,
     precio_detal: datos.precioDetal,
     precio_mayor: datos.precioMayor,
@@ -135,15 +154,58 @@ export async function actualizarProducto(productoId: string, datos: {
   }
 
   if (imagenUrl) {
-    payload.imagen_url = imagenUrl
+    camposAActualizar.imagen_url = imagenUrl
   }
 
-  const { error } = await supabaseAdmin.from('productos').update(payload).eq('id', productoId)
+  const camposRelevantes = [
+    ['nombre', productoActual.nombre, datos.nombre],
+    ['precio_detal', productoActual.precio_detal, datos.precioDetal],
+    ['precio_mayor', productoActual.precio_mayor, datos.precioMayor],
+    ['codigo_barras', productoActual.codigo_barras, datos.codigoBarras],
+    ['stock', productoActual.stock, datos.stock],
+  ] as const
 
-  if (error) return { error: 'No se pudo actualizar el producto' }
+  for (const [campo, anterior, nuevo] of camposRelevantes) {
+    if (String(anterior ?? '') !== String(nuevo ?? '')) {
+      cambiosPendientes.push({
+        campo,
+        valor_anterior: anterior ?? null,
+        valor_nuevo: nuevo ?? null,
+      })
+    }
+  }
 
-  revalidatePath('/productos')
-  return { ok: true }
+  if (sesion.rol === 'dueno') {
+    const { error } = await supabaseAdmin.from('productos').update(camposAActualizar).eq('id', productoId)
+
+    if (error) return { error: 'No se pudo actualizar el producto' }
+
+    revalidatePath('/productos')
+    revalidatePath('/ventas')
+    return { ok: true }
+  }
+
+  if (cambiosPendientes.length === 0) {
+    return { ok: true }
+  }
+
+  const solicitudes = cambiosPendientes.map((cambio) => ({
+    id_producto: productoId,
+    nombre_producto: datos.nombre,
+    campo: cambio.campo,
+    valor_anterior: cambio.valor_anterior,
+    valor_nuevo: cambio.valor_nuevo,
+    estado: 'pendiente',
+    created_at: new Date().toISOString(),
+  }))
+
+  const { error: errorSolicitud } = await supabaseAdmin.from('solicitudes_producto').insert(solicitudes)
+
+  if (errorSolicitud) {
+    return { error: 'No se pudo enviar la solicitud para aprobación del dueño.' }
+  }
+
+  return { ok: true, pendienteAprobacion: true }
 }
 
 export async function agregarStock(productoId: string, cantidad: number) {

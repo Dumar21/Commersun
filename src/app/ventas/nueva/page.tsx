@@ -8,5 +8,9 @@ export default async function NuevaFacturaPage() {
     .select('id, nombre, precio_detal, precio_mayor, stock, imagen_url')
     .order('nombre')
 
-  return <NuevaFactura productos={productos ?? []} />
+  return (
+    <div className="mx-auto max-w-7xl">
+      <NuevaFactura productos={productos ?? []} />
+    </div>
+  )
 }

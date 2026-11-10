@@ -2,7 +2,8 @@
 'use client'
 
 import type React from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { crearFactura, actualizarFactura, confirmarFactura } from '@/app/ventas/actions'
 
@@ -48,15 +49,8 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
   // --- Modal de búsqueda de productos ---
   const [buscadorAbierto, setBuscadorAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
+  const busquedaDiferida = useDeferredValue(busqueda)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (buscadorAbierto) {
-      // Autofocus al abrir + reset del texto de búsqueda
-      setBusqueda('')
-      requestAnimationFrame(() => inputRef.current?.focus())
-    }
-  }, [buscadorAbierto])
 
   useEffect(() => {
     if (!buscadorAbierto) return
@@ -68,10 +62,10 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
   }, [buscadorAbierto])
 
   const productosFiltrados = useMemo(() => {
-    const texto = busqueda.trim().toLowerCase()
+    const texto = busquedaDiferida.trim().toLowerCase()
     if (!texto) return productos
     return productos.filter((producto) => producto.nombre.toLowerCase().includes(texto))
-  }, [busqueda, productos])
+  }, [busquedaDiferida, productos])
 
   const productosSugeridos = useMemo(() => productosFiltrados.slice(0, 8), [productosFiltrados])
 
@@ -181,7 +175,11 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
             {/* Disparador del buscador: ya no empuja contenido, abre el modal */}
             <button
               type="button"
-              onClick={() => setBuscadorAbierto(true)}
+              onClick={() => {
+                setBusqueda('')
+                setBuscadorAbierto(true)
+                requestAnimationFrame(() => inputRef.current?.focus())
+              }}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-2/80 px-4 py-3 text-left text-muted transition hover:border-primary-bright/60 hover:bg-surface"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -214,7 +212,14 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
                       <div className="flex items-center gap-3 lg:contents">
                         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
                           {producto?.imagen_url ? (
-                            <img src={producto.imagen_url} alt={producto.nombre} className="h-full w-full object-cover" />
+                            <Image
+                              src={producto.imagen_url}
+                              alt={producto.nombre}
+                              width={40}
+                              height={40}
+                              sizes="40px"
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             <div className="flex h-full items-center justify-center text-[9px] text-muted">IMG</div>
                           )}
@@ -380,7 +385,14 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
                     >
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
                         {producto.imagen_url ? (
-                          <img src={producto.imagen_url} alt={producto.nombre} className="h-full w-full object-cover" />
+                          <Image
+                            src={producto.imagen_url}
+                            alt={producto.nombre}
+                            width={40}
+                            height={40}
+                            sizes="40px"
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
                           <div className="flex h-full items-center justify-center text-[10px] text-muted">IMG</div>
                         )}

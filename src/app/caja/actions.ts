@@ -45,15 +45,17 @@ export async function pagarFactura(facturaId: string) {
 
   if (!venta) return { error: 'Factura no encontrada' }
   if (venta.estado !== 'aceptada') return { error: 'La factura debe estar aceptada primero' }
+  if (!venta.id_cajero) return { error: 'Esta factura no tiene un cajero asignado' }
   if (venta.id_cajero !== sesion.sub && sesion.rol !== 'dueno') return { error: 'Solo el cajero que la aceptó puede pagarla' }
 
   const { error } = await supabaseAdmin.rpc('pagar_factura', {
     p_venta_id: facturaId,
-    p_cajero_id: sesion.sub,
+    p_cajero_id: venta.id_cajero,
   })
 
   if (error) return { error: error.message }
 
   revalidatePath('/caja')
+  revalidatePath('/productos')
   return { ok: true }
 }

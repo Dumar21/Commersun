@@ -12,13 +12,17 @@ export default async function EditarFacturaPage({ params }: { params: Promise<{ 
   const { data: factura } = await supabaseAdmin.from('ventas').select('id, estado, id_vendedor').eq('id', id).single()
 
   if (!factura) notFound()
-  if (factura.estado !== 'borrador') return <p className="text-danger">Esta factura ya no se puede editar.</p>
-  if (factura.id_vendedor !== sesion.sub && sesion.rol !== 'dueno') return <p className="text-danger">No tienes acceso a esta factura.</p>
+  if (factura.estado !== 'borrador') return <p className="text-danger p-6">Esta factura ya no se puede editar.</p>
+  if (factura.id_vendedor !== sesion.sub && sesion.rol !== 'dueno') return <p className="text-danger p-6">No tienes acceso a esta factura.</p>
 
   const [{ data: productos }, { data: detalles }] = await Promise.all([
     supabaseAdmin.from('productos').select('id, nombre, precio_detal, precio_mayor, stock, imagen_url').order('nombre'),
     supabaseAdmin.from('detalle_venta').select('id_producto, cantidad, tipo_venta').eq('id_venta', id),
   ])
 
-  return <NuevaFactura productos={productos ?? []} facturaId={id} itemsIniciales={detalles ?? []} />
+  return (
+    <div className="mx-auto max-w-7xl">
+      <NuevaFactura productos={productos ?? []} facturaId={id} itemsIniciales={detalles ?? []} />
+    </div>
+  )
 }

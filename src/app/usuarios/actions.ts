@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { verificarSessionToken } from '@/lib/session'
+import type { Rol } from '@/lib/database.types'
 
 async function obtenerSesion() {
   const token = (await cookies()).get('session')?.value
@@ -16,9 +17,14 @@ const ROLES_QUE_PUEDE_GESTIONAR: Record<string, string[]> = {
   dueno: ['vendedor', 'cajero', 'bodegero'],
 }
 
+function esRol(rol: string): rol is Rol {
+  return ['super_admin', 'dueno', 'vendedor', 'cajero', 'bodegero'].includes(rol)
+}
+
 export async function crearUsuario(nombre: string, rol: string, pin: string) {
   const sesion = await obtenerSesion()
   if (!sesion) return { error: 'No autorizado' }
+  if (!esRol(rol)) return { error: 'El rol seleccionado no es válido' }
 
   const rolesPermitidos = ROLES_QUE_PUEDE_GESTIONAR[sesion.rol]
   if (!rolesPermitidos?.includes(rol)) {

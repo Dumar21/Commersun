@@ -20,6 +20,40 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## AI report assistant providers
+
+The report assistant discovers a tool-capable model from each configured
+provider and falls back to the next provider when one is unavailable. The
+default order is `groq,openrouter,huggingface,google,bai`; model catalog results
+are cached for five minutes. Add only the provider keys you have to `.env.local`
+and restart the dev server:
+
+```env
+CHAT_AI_PROVIDER_ORDER=groq,openrouter,huggingface,google,bai
+GROQ_API_KEY=
+OPENROUTER_API_KEY=
+HF_TOKEN=
+GEMINI_API_KEY=
+```
+
+Model IDs are optional overrides (`GROQ_MODEL`, `OPENROUTER_MODEL`, `HF_MODEL`,
+`GEMINI_MODEL`). Without overrides, OpenRouter and Hugging Face are filtered to
+models marked free and supporting tools; Groq and Google use their available
+model catalogs and select a chat-capable model. Provider quotas, pricing, and
+model availability depend on each account.
+
+B.AI is optional and requires documented OpenAI-compatible chat-completions
+and tool-calling support before it can be enabled:
+
+```env
+BAI_API_KEY=
+BAI_API_BASE_URL=
+BAI_MODEL=
+```
+
+Keep all API keys out of `NEXT_PUBLIC_*` variables and do not commit
+`.env.local`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

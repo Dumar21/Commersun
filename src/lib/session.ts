@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose'
+import type { Rol } from '@/lib/database.types'
 
 const secret = new TextEncoder().encode(process.env.SESSION_SECRET!)
 
-export type Rol = 'super_admin' | 'dueno' | 'vendedor' | 'cajero' | 'bodegero'
+export type { Rol } from '@/lib/database.types'
 
 export interface SessionPayload {
   sub: string

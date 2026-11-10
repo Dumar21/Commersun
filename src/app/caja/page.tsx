@@ -3,33 +3,68 @@ import { obtenerSesion } from '@/lib/auth-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import FilaFactura from '@/components/caja/FilaFactura'
 
+interface VentaCaja {
+  id: string
+  total: number
+  fecha_hora: string
+  id_vendedor: string
+}
+
+interface DetalleCaja {
+  id_venta: string
+  id_producto: string
+  cantidad: number
+  tipo_venta: string
+  precio_unitario: number
+}
+
+interface UsuarioCaja {
+  id: string
+  nombre: string
+}
+
 export default async function CajaPage() {
   const sesion = await obtenerSesion()
   if (!sesion) return null
 
-  const { data: pendientes } = await supabaseAdmin
-    .from('ventas').select('id, total, fecha_hora, id_vendedor')
-    .eq('estado', 'pendiente_caja').order('fecha_hora')
+  const [{ data: pendientes }, { data: aceptadas }] = await Promise.all([
+    supabaseAdmin
+      .from('ventas')
+      .select('id, total, fecha_hora, id_vendedor')
+      .eq('estado', 'pendiente_caja')
+      .order('fecha_hora'),
+    supabaseAdmin
+      .from('ventas')
+      .select('id, total, fecha_hora, id_vendedor')
+      .eq('estado', 'aceptada')
+      .eq('id_cajero', sesion.sub)
+      .order('fecha_hora'),
+  ])
 
-  const { data: aceptadas } = await supabaseAdmin
-    .from('ventas').select('id, total, fecha_hora, id_vendedor')
-    .eq('estado', 'aceptada').eq('id_cajero', sesion.sub).order('fecha_hora')
-
-  const idsVentas = [...new Set([...(pendientes ?? []), ...(aceptadas ?? [])].map((f) => f.id))]
-  const { data: detalles } = idsVentas.length > 0
-    ? await supabaseAdmin
-        .from('detalle_venta')
-        .select('id_venta, id_producto, cantidad, tipo_venta, precio_unitario')
-        .in('id_venta', idsVentas)
-    : { data: [] }
-
+  const facturasPendientes: VentaCaja[] = pendientes ?? []
+  const facturasAceptadas: VentaCaja[] = aceptadas ?? []
+  const idsVentas = [...new Set([...facturasPendientes, ...facturasAceptadas].map((f) => f.id))]
+  const idsVendedores = [...new Set([...facturasPendientes, ...facturasAceptadas].map((f) => f.id_vendedor))]
+  const [resultadoDetalles, resultadoVendedores] = await Promise.all([
+    idsVentas.length > 0
+      ? supabaseAdmin
+          .from('detalle_venta')
+          .select('id_venta, id_producto, cantidad, tipo_venta, precio_unitario')
+          .in('id_venta', idsVentas)
+      : Promise.resolve({ data: [] as DetalleCaja[], error: null }),
+    idsVendedores.length > 0
+      ? supabaseAdmin
+          .from('usuarios')
+          .select('id, nombre')
+          .in('id', idsVendedores)
+      : Promise.resolve({ data: [] as UsuarioCaja[], error: null }),
+  ])
+  const detalles: DetalleCaja[] = resultadoDetalles.data ?? []
   const idsProductos = [...new Set((detalles ?? []).map((d) => d.id_producto))]
-  const { data: productos } = idsProductos.length > 0
-    ? await supabaseAdmin
-        .from('productos')
-        .select('id, nombre')
-        .in('id', idsProductos)
+  const { data: productosConsultados } = idsProductos.length > 0
+    ? await supabaseAdmin.from('productos').select('id, nombre').in('id', idsProductos)
     : { data: [] }
+  const productos: Array<{ id: string; nombre: string }> = productosConsultados ?? []
 
   const nombreProductoPorId = new Map((productos ?? []).map((p) => [p.id, p.nombre]))
   const detallesPorVenta = new Map<string, Array<{ nombre: string; cantidad: number; tipo_venta: string; precio_unitario: number; subtotal: number }>>()
@@ -49,56 +84,73 @@ export default async function CajaPage() {
     detallesPorVenta.set(detalle.id_venta, actual)
   }
 
-  const idsVendedores = [...new Set([...(pendientes ?? []), ...(aceptadas ?? [])].map((f) => f.id_vendedor))]
-  const { data: vendedores } = await supabaseAdmin
-    .from('usuarios').select('id, nombre')
-    .in('id', idsVendedores.length > 0 ? idsVendedores : ['00000000-0000-0000-0000-000000000000'])
-
-  const nombrePorId = new Map(vendedores?.map((v) => [v.id, v.nombre]))
+  const vendedores: UsuarioCaja[] = resultadoVendedores.data ?? []
+  const nombrePorId = new Map(vendedores.map((v) => [v.id, v.nombre]))
 
   return (
-    <div className="space-y-8">
-      <div className="card bg-[radial-gradient(circle_at_top_left,_rgba(139,42,119,0.12),transparent_35%)]">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-accent-bright">Caja</p>
-            <h1 className="text-2xl font-display font-bold text-ink">Facturas pendientes</h1>
-          </div>
-          <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-sm text-muted">{pendientes?.length ?? 0} en cola</span>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          {pendientes?.map((f) => (
-            <FilaFactura
-              key={f.id}
-              factura={{ ...f, nombreVendedor: nombrePorId.get(f.id_vendedor) ?? '—' }}
-              accion="aceptar"
-              items={detallesPorVenta.get(f.id) ?? []}
-            />
-          ))}
-          {pendientes?.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-surface-2/70 p-5 text-sm text-muted">No hay facturas esperando.</p>}
-        </div>
+    <div className="mx-auto max-w-7xl space-y-8">
+      <div className="flex flex-col gap-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-bright">Operaciones de Pago</p>
+        <h1 className="text-3xl font-display font-bold text-ink">Terminal de Caja</h1>
       </div>
 
-      <div className="card bg-[radial-gradient(circle_at_top_left,_rgba(23,169,196,0.12),transparent_35%)]">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-primary-bright">Mi flujo</p>
-            <h2 className="text-2xl font-display font-bold text-ink">Mis facturas aceptadas</h2>
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Facturas pendientes en cola */}
+        <div className="card space-y-6 bg-gradient-to-br from-accent/5 to-transparent border-white/5">
+          <div className="flex items-center justify-between border-b border-border/60 pb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-accent-bright">En espera</p>
+              <h2 className="text-xl font-display font-bold text-ink">Facturas pendientes</h2>
+            </div>
+            <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-bold text-accent-bright">
+              {facturasPendientes.length} en cola
+            </span>
           </div>
-          <span className="rounded-full border border-border bg-surface-2 px-3 py-1 text-sm text-muted">{aceptadas?.length ?? 0} activas</span>
+
+          <div className="flex flex-col gap-4">
+            {facturasPendientes.map((f) => (
+              <FilaFactura
+                key={f.id}
+                factura={{ ...f, nombreVendedor: nombrePorId.get(f.id_vendedor) ?? '—' }}
+                accion="aceptar"
+                items={detallesPorVenta.get(f.id) ?? []}
+              />
+            ))}
+            {facturasPendientes.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border/60 bg-surface-2/40 p-8 text-center text-sm text-muted">
+                No hay facturas esperando cobro en este momento.
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {aceptadas?.map((f) => (
-            <FilaFactura
-              key={f.id}
-              factura={{ ...f, nombreVendedor: nombrePorId.get(f.id_vendedor) ?? '—' }}
-              accion="pagar"
-              items={detallesPorVenta.get(f.id) ?? []}
-            />
-          ))}
-          {aceptadas?.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-surface-2/70 p-5 text-sm text-muted">No tienes facturas en proceso.</p>}
+        {/* Facturas aceptadas / activas */}
+        <div className="card space-y-6 bg-gradient-to-br from-primary/5 to-transparent border-white/5">
+          <div className="flex items-center justify-between border-b border-border/60 pb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary-bright">En proceso</p>
+              <h2 className="text-xl font-display font-bold text-ink">Mis facturas aceptadas</h2>
+            </div>
+            <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-bright">
+              {facturasAceptadas.length} activas
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {facturasAceptadas.map((f) => (
+              <FilaFactura
+                key={f.id}
+                factura={{ ...f, nombreVendedor: nombrePorId.get(f.id_vendedor) ?? '—' }}
+                accion="pagar"
+                items={detallesPorVenta.get(f.id) ?? []}
+              />
+            ))}
+            {facturasAceptadas.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border/60 bg-surface-2/40 p-8 text-center text-sm text-muted">
+                No tienes facturas activas aceptadas por procesar.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+// src/app/usuarios/page.tsx
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { obtenerSesion } from '@/lib/auth-server'
 import UsuariosAdminPanel from '@/components/usuarios/UsuariosAdminPanel'
@@ -12,14 +13,10 @@ export default async function UsuariosPage() {
     .order('nombre', { ascending: true })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-ink">Administrar usuarios</h1>
-          <p className="text-sm text-muted">
-            Aquí puedes crear cuentas para dueños, vendedores, cajeros y bodegueros.
-          </p>
-        </div>
+    <div className="mx-auto max-w-7xl space-y-8">
+      <div className="flex flex-col gap-1">
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary-bright">Gestión de Usuarios</p>
+        <h1 className="text-3xl font-display font-bold text-ink">Administrar usuarios</h1>
       </div>
       <UsuariosAdminPanel
         currentRol={sesion.rol}
