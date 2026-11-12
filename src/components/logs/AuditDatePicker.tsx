@@ -75,7 +75,8 @@ function getReferenceDate(value: string, min?: string, max?: string): Date {
   const today = todayString()
 
   for (const candidate of [value, min, max, today]) {
-    const date = candidate ? parseDate(candidate) : null
+    if (!candidate) continue
+    const date = parseDate(candidate)
     if (date && isWithinRange(candidate, min, max)) return date
   }
 
