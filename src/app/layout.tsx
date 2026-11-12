@@ -37,12 +37,12 @@ function NavLoading() {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://tudominio.com'),
+  metadataBase: new URL('https://commersun.vercel.app'),
   title: 'Vento',
   description: 'Sistema de punto de venta e inventario',
   openGraph: {
-    title: 'Vento',
-    description: 'Sistema de punto de venta e inventario',
+    title: 'Vento · Punto de venta e inventario',
+    description: 'Controla tus ventas, la caja y tu inventario en un solo lugar.',
     url: '/',
     siteName: 'Vento',
     locale: 'es_CO',
@@ -58,8 +58,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vento',
-    description: 'Sistema de punto de venta e inventario',
+    title: 'Vento · Punto de venta e inventario',
+    description: 'Controla tus ventas, la caja y tu inventario en un solo lugar.',
     images: ['/og.png'],
   },
 }
@@ -68,6 +68,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#22d3ee',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
