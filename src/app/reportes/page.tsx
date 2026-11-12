@@ -7,11 +7,11 @@ export default async function ReportesPage() {
   if (!sesion || sesion.rol !== 'dueno') return null
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-5">
       <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-bright">Analítica con IA</p>
-        <h1 className="text-3xl font-display font-bold text-ink">Asistente de reportes</h1>
-        <p className="text-sm text-muted">Pregunta sobre tus ventas, productos y vendedores en lenguaje normal.</p>
+        <p className="text-sm text-muted">Reportes</p>
+        <h1 className="text-2xl font-display font-semibold text-ink">Asistente de reportes</h1>
+        <p className="max-w-[65ch] text-sm text-muted">Consulta datos de ventas, productos y vendedores con preguntas en lenguaje natural.</p>
       </div>
       <ChatReportes />
     </div>

@@ -1,3 +1,5 @@
-import NuevaFacturaLoading from '../nueva/loading'
+import NuevaFacturaSkeleton from '@/components/ventas/NuevaFacturaSkeleton'
 
-export default NuevaFacturaLoading
+export default function EditarFacturaLoading() {
+  return <NuevaFacturaSkeleton editing />
+}

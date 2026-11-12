@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { verificarSessionToken } from '@/lib/session'
 import type { Rol } from '@/lib/database.types'
+import { ejecutarConAuditoria } from '@/lib/audit-log'
 
 async function obtenerSesion() {
   const token = (await cookies()).get('session')?.value
@@ -53,15 +54,27 @@ export async function crearUsuario(nombre: string, rol: string, pin: string) {
 
   const pinHash = await bcrypt.hash(pin, 10)
 
-  const { error } = await supabaseAdmin.from('usuarios').insert({
-    nombre,
-    rol,
-    pin_hash: pinHash,
-    creado_por: sesion.sub,
-  })
+  return ejecutarConAuditoria(sesion, {
+    action: 'users.created',
+    entityType: 'usuario',
+    summary: `Creó a ${nombre.trim()} como ${rol}`,
+    details: { nombre: nombre.trim(), rol },
+  }, async (setEntityId) => {
+    const { data: usuario, error } = await supabaseAdmin
+      .from('usuarios')
+      .insert({
+      nombre: nombre.trim(),
+      rol,
+      pin_hash: pinHash,
+      creado_por: sesion.sub,
+      })
+      .select('id')
+      .single()
 
-  if (error) return { error: 'No se pudo crear el usuario' }
-  return { ok: true }
+    if (error || !usuario) return { error: 'No se pudo crear el usuario' }
+    setEntityId(usuario.id)
+    return { ok: true }
+  })
 }
 
 export async function eliminarUsuario(usuarioId: string) {
@@ -74,7 +87,7 @@ export async function eliminarUsuario(usuarioId: string) {
 
   const { data: objetivo, error: errorConsulta } = await supabaseAdmin
     .from('usuarios')
-    .select('rol')
+    .select('nombre, rol')
     .eq('id', usuarioId)
     .single()
 
@@ -85,7 +98,15 @@ export async function eliminarUsuario(usuarioId: string) {
     return { error: 'No tienes permiso para eliminar ese rol' }
   }
 
-  const { error } = await supabaseAdmin.from('usuarios').update({ activo: false }).eq('id', usuarioId)
-  if (error) return { error: 'No se pudo eliminar el usuario' }
-  return { ok: true }
+  return ejecutarConAuditoria(sesion, {
+    action: 'users.deactivated',
+    entityType: 'usuario',
+    entityId: usuarioId,
+    summary: `Desactivó a ${objetivo.nombre}`,
+    details: { nombre: objetivo.nombre, rol: objetivo.rol },
+  }, async () => {
+    const { error } = await supabaseAdmin.from('usuarios').update({ activo: false }).eq('id', usuarioId)
+    if (error) return { error: 'No se pudo eliminar el usuario' }
+    return { ok: true }
+  })
 }

@@ -88,21 +88,21 @@ export default async function CajaPage() {
   const nombrePorId = new Map(vendedores.map((v) => [v.id, v.nombre]))
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-bright">Operaciones de Pago</p>
-        <h1 className="text-3xl font-display font-bold text-ink">Terminal de Caja</h1>
+        <p className="text-sm text-muted">Operaciones de pago</p>
+        <h1 className="text-2xl font-display font-semibold text-ink">Terminal de caja</h1>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         {/* Facturas pendientes en cola */}
-        <div className="card space-y-6 bg-gradient-to-br from-accent/5 to-transparent border-white/5">
+        <div className="card space-y-5">
           <div className="flex items-center justify-between border-b border-border/60 pb-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-accent-bright">En espera</p>
-              <h2 className="text-xl font-display font-bold text-ink">Facturas pendientes</h2>
+              <p className="text-xs font-medium text-muted">En espera</p>
+              <h2 className="mt-1 text-base font-semibold text-ink">Facturas pendientes</h2>
             </div>
-            <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-bold text-accent-bright">
+            <span className="rounded-md border border-accent/20 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent-bright">
               {facturasPendientes.length} en cola
             </span>
           </div>
@@ -117,7 +117,7 @@ export default async function CajaPage() {
               />
             ))}
             {facturasPendientes.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border/60 bg-surface-2/40 p-8 text-center text-sm text-muted">
+              <div className="rounded-lg border border-border/70 bg-surface-2/40 p-6 text-center text-sm text-muted">
                 No hay facturas esperando cobro en este momento.
               </div>
             )}
@@ -125,13 +125,13 @@ export default async function CajaPage() {
         </div>
 
         {/* Facturas aceptadas / activas */}
-        <div className="card space-y-6 bg-gradient-to-br from-primary/5 to-transparent border-white/5">
+        <div className="card space-y-5">
           <div className="flex items-center justify-between border-b border-border/60 pb-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary-bright">En proceso</p>
-              <h2 className="text-xl font-display font-bold text-ink">Mis facturas aceptadas</h2>
+              <p className="text-xs font-medium text-muted">En proceso</p>
+              <h2 className="mt-1 text-base font-semibold text-ink">Mis facturas aceptadas</h2>
             </div>
-            <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold text-primary-bright">
+            <span className="rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary-bright">
               {facturasAceptadas.length} activas
             </span>
           </div>
@@ -146,7 +146,7 @@ export default async function CajaPage() {
               />
             ))}
             {facturasAceptadas.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border/60 bg-surface-2/40 p-8 text-center text-sm text-muted">
+              <div className="rounded-lg border border-border/70 bg-surface-2/40 p-6 text-center text-sm text-muted">
                 No tienes facturas activas aceptadas por procesar.
               </div>
             )}

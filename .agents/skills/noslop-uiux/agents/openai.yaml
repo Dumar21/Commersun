@@ -1,0 +1,5 @@
+interface:
+  display_name: "noslop-uiux"
+  short_description: "Design direction, UX states, typography and brand before code."
+policy:
+  allow_implicit_invocation: true

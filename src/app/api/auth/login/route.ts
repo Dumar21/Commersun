@@ -2,6 +2,43 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { crearSessionToken } from '@/lib/session'
+import { ejecutarConAuditoria } from '@/lib/audit-log'
+
+async function crearRespuestaSesion(usuario: { id: string; nombre: string; rol: 'super_admin' | 'dueno' | 'vendedor' | 'cajero' | 'bodegero' }) {
+  const token = await crearSessionToken({
+    sub: usuario.id,
+    nombre: usuario.nombre,
+    rol: usuario.rol,
+  })
+
+  const resultado = await ejecutarConAuditoria({
+    sub: usuario.id,
+    nombre: usuario.nombre,
+    rol: usuario.rol,
+  }, {
+    action: 'auth.login',
+    entityType: 'sesion',
+    entityId: usuario.id,
+    summary: 'Inició sesión',
+  }, async () => ({ ok: true }))
+
+  if ('error' in resultado) {
+    return NextResponse.json(
+      { error: 'No se pudo iniciar sesión porque no se pudo registrar la actividad.' },
+      { status: 503 },
+    )
+  }
+
+  const response = NextResponse.json({ ok: true, rol: usuario.rol })
+  response.cookies.set('session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 12,
+  })
+  return response
+}
 
 export async function GET() {
   const { data: usuarios, error } = await supabaseAdmin
@@ -48,22 +85,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario o PIN incorrectos' }, { status: 401 })
     }
 
-    const token = await crearSessionToken({
-      sub: usuarioSeleccionado.id,
-      nombre: usuarioSeleccionado.nombre,
-      rol: usuarioSeleccionado.rol,
-    })
-
-    const response = NextResponse.json({ ok: true, rol: usuarioSeleccionado.rol })
-    response.cookies.set('session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 12,
-    })
-
-    return response
+    return crearRespuestaSesion(usuarioSeleccionado)
   }
 
   if (usuariosCoincidentes.length === 0) {
@@ -81,20 +103,5 @@ export async function POST(request: NextRequest) {
   }
 
   const [usuarioEncontrado] = usuariosCoincidentes
-  const token = await crearSessionToken({
-    sub: usuarioEncontrado.id,
-    nombre: usuarioEncontrado.nombre,
-    rol: usuarioEncontrado.rol,
-  })
-
-  const response = NextResponse.json({ ok: true, rol: usuarioEncontrado.rol })
-  response.cookies.set('session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 12,
-  })
-
-  return response
+  return crearRespuestaSesion(usuarioEncontrado)
 }

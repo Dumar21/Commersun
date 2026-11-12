@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import EscanerCodigoBarras from './EscanerCodigoBarras'
 import { crearProducto, actualizarProducto } from '@/app/productos/actions'
@@ -87,7 +88,7 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
     leerArchivo(event.target.files?.[0])
   }
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (event: React.DragEvent<HTMLButtonElement>) => {
     event.preventDefault()
     setArrastrandoImagen(false)
     leerArchivo(event.dataTransfer.files?.[0])
@@ -139,17 +140,18 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="card space-y-6 bg-surface/50 border border-border/60">
+      <form onSubmit={handleSubmit} className="card space-y-6">
         {/* Mensajes de error/estado */}
-        {mensaje && <div className="rounded-xl border border-accent/20 bg-accent/10 px-4 py-3 text-sm text-accent-bright">{mensaje}</div>}
-        {error && <div className="rounded-xl border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div>}
+        {mensaje && <div role="status" className="rounded-lg border border-accent/20 bg-accent/10 px-4 py-3 text-sm text-accent-bright">{mensaje}</div>}
+        {error && <div role="alert" className="rounded-lg border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div>}
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Columna principal */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <label className="field-label">Nombre del producto</label>
+              <label htmlFor="producto-nombre" className="field-label">Nombre del producto</label>
               <input
+                id="producto-nombre"
                 type="text"
                 className="field-input"
                 placeholder="Ej: Luces LED 10m"
@@ -161,33 +163,33 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-1">
-                <label className="field-label">Precio Detal</label>
+                <label htmlFor="producto-precio-detal" className="field-label">Precio detal</label>
                 <div className="relative">
                   <span className="absolute left-3 top-[13px] text-sm text-muted">$</span>
-                  <input type="number" className="field-input pl-8" value={precioDetal} onChange={(e) => setPrecioDetal(e.target.value)} required />
+                  <input id="producto-precio-detal" type="number" className="field-input pl-8" value={precioDetal} onChange={(e) => setPrecioDetal(e.target.value)} required />
                 </div>
               </div>
               <div className="sm:col-span-1">
-                <label className="field-label">Precio Mayor</label>
+                <label htmlFor="producto-precio-mayor" className="field-label">Precio mayor</label>
                 <div className="relative">
                   <span className="absolute left-3 top-[13px] text-sm text-muted">$</span>
-                  <input type="number" className="field-input pl-8" value={precioMayor} onChange={(e) => setPrecioMayor(e.target.value)} required />
+                  <input id="producto-precio-mayor" type="number" className="field-input pl-8" value={precioMayor} onChange={(e) => setPrecioMayor(e.target.value)} required />
                 </div>
               </div>
               <div className="sm:col-span-1">
-                <label className="field-label">Stock Inicial</label>
-                <input type="number" className="field-input" value={stockInicial} onChange={(e) => setStockInicial(e.target.value)} />
+                <label htmlFor="producto-stock" className="field-label">Stock inicial</label>
+                <input id="producto-stock" type="number" className="field-input" value={stockInicial} onChange={(e) => setStockInicial(e.target.value)} />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="field-label mb-0">Código de Barras</label>
+                <label htmlFor="producto-codigo-barras" className="field-label mb-0">Código de barras</label>
                 <span className="text-[10px] text-muted">Usa escáner USB directamente o la cámara</span>
               </div>
               <div className="flex gap-2">
-                <input type="text" className="field-input" value={codigoBarras} onChange={(e) => setCodigoBarras(e.target.value)} required />
-                <button type="button" onClick={() => setEscaneando(true)} className="btn-secondary px-4" title="Escanear con cámara">
+                <input id="producto-codigo-barras" type="text" className="field-input" value={codigoBarras} onChange={(e) => setCodigoBarras(e.target.value)} required />
+                <button type="button" onClick={() => setEscaneando(true)} className="btn-secondary px-4" aria-label="Escanear código de barras con la cámara">
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h10M7 17h10"/></svg>
                 </button>
               </div>
@@ -196,24 +198,33 @@ export default function FormularioProducto({ producto }: { producto?: ProductoFo
 
           {/* Columna lateral (Imagen) */}
           <div className="lg:col-span-1">
-            <label className="field-label mb-2 block">Imagen del producto</label>
-            <div
+            <p className="field-label mb-2">Imagen del producto</p>
+            <button
+              type="button"
+              aria-label="Seleccionar imagen del producto"
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setArrastrandoImagen(true); }}
               onDragLeave={() => setArrastrandoImagen(false)}
               onDrop={handleDrop}
-              className={`group relative aspect-[3/2] lg:aspect-square w-full cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-border bg-surface-2 transition hover:border-primary-bright ${arrastrandoImagen ? 'border-primary-bright bg-primary/10' : ''}`}
+              className={`group relative aspect-[3/2] w-full cursor-pointer overflow-hidden rounded-xl border border-dashed border-border bg-surface-2 text-left transition-colors hover:border-primary-bright focus-visible:outline-2 focus-visible:outline-primary-bright focus-visible:outline-offset-2 lg:aspect-square ${arrastrandoImagen ? 'border-primary-bright bg-primary/10' : ''}`}
             >
               {imagenPreview ? (
-                <img src={imagenPreview} className="h-full w-full object-cover" />
+                <Image
+                  src={imagenPreview}
+                  alt={`Vista previa de ${nombre || 'producto'}`}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  unoptimized
+                  className="object-cover"
+                />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center text-muted">
                   <svg className="h-8 w-8 mb-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7M16 5l4 4M20 5l-4 4"/></svg>
                   <span className="text-xs">Subir foto</span>
                 </div>
               )}
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" aria-label="Archivo de imagen del producto" />
           </div>
         </div>
 

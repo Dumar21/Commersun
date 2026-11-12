@@ -19,6 +19,34 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase SQL setup
+
+Before creating the first account or using the activity log, run
+[`supabase/audit_logs.sql`](./supabase/audit_logs.sql) in the Supabase SQL Editor.
+Run [`supabase/pagar_factura.sql`](./supabase/pagar_factura.sql) there as well to
+enable invoice payment and inventory updates. The activity log records actions
+from activation onward; older changes cannot be reconstructed.
+
+## Quality gates
+
+Noslop's Git hooks run ESLint before commits and TypeScript checks before pushes.
+Run `npm run ci` to execute both locally. After cloning, enable the hooks with
+`git config core.hooksPath .githooks`. The current checks use the tools already
+configured by this project; formatting, spell-checking, and automated tests are
+not enabled because those tools or test scripts are not configured here. Run
+`npx --yes @45ck/noslop doctor` to verify the generated wiring. The generic
+`noslop check` command is not configured for this project, and rerunning
+`noslop update` would overwrite the project-specific hook adjustments.
+
+## Visual UI review
+
+The `noslopdesign` skills (`noslop-frontend` and `noslop-uiux`) are installed for
+GitHub Copilot under `.agents/skills/`. Start a new Copilot chat and ask it to
+audit a screen, for example: “Use noslop-frontend in audit mode to review
+`src/app/dashboard/page.tsx` at mobile, tablet, and desktop sizes; do not edit
+files.” A visual review needs the app running and a browser available. Use
+`noslop-uiux` when you want design direction before making changes.
+
 ## AI report assistant providers
 
 The report assistant discovers a tool-capable model from each configured

@@ -27,7 +27,7 @@ export default function AgregarStockManual({ productos }: { productos: Producto[
 
     setGuardando(false)
 
-    if (resultado.error) {
+    if (!('ok' in resultado)) {
       setMensaje(resultado.error)
       return
     }

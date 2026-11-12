@@ -12,6 +12,7 @@ interface LogEntry {
 
 export default function EntradaInventario() {
   const [ultimoNoEncontrado, setUltimoNoEncontrado] = useState<string | null>(null)
+  const [error, setError] = useState('')
   const [log, setLog] = useState<LogEntry[]>([])
   const [procesando, setProcesando] = useState(false)
   const bufferRef = useRef('')
@@ -20,6 +21,7 @@ export default function EntradaInventario() {
   const procesarCodigo = async (codigo: string) => {
     setProcesando(true)
     setUltimoNoEncontrado(null)
+    setError('')
 
     const producto = await buscarProductoPorCodigo(codigo)
 
@@ -32,13 +34,18 @@ export default function EntradaInventario() {
     const resultado = await agregarStock(producto.id, 1)
     setProcesando(false)
 
-    if (resultado.error) {
-      alert(resultado.error)
+    if (!('ok' in resultado)) {
+      setError(resultado.error)
+      return
+    }
+
+    if (!('nuevoStock' in resultado)) {
+      setError('No se pudo confirmar el nuevo stock')
       return
     }
 
     setLog((prev) => [
-      { nombre: producto.nombre, stock: resultado.nuevoStock!, hora: new Date().toLocaleTimeString() },
+      { nombre: producto.nombre, stock: resultado.nuevoStock, hora: new Date().toLocaleTimeString() },
       ...prev,
     ])
   }
@@ -83,12 +90,14 @@ export default function EntradaInventario() {
         </p>
       </div>
 
-      {procesando && <p className="text-sm text-primary-bright">Procesando...</p>}
+      {procesando && <p role="status" className="text-sm text-muted">Procesando...</p>}
+
+      {error && <p role="alert" className="rounded-lg border border-danger/20 bg-danger/10 p-3 text-sm text-danger">{error}</p>}
 
       {ultimoNoEncontrado && (
-        <div className="rounded-lg border border-danger bg-danger/10 p-3 text-sm text-ink flex items-center justify-between gap-4">
+        <div role="status" className="flex items-center justify-between gap-4 rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-ink">
           <span>El código <strong>{ultimoNoEncontrado}</strong> no está registrado.</span>
-          <a href={`/productos/nuevo?codigo=${ultimoNoEncontrado}`} className="btn-secondary whitespace-nowrap">
+          <a href={`/productos/nuevo?codigo=${encodeURIComponent(ultimoNoEncontrado)}`} className="btn-secondary whitespace-nowrap">
             Registrar producto
           </a>
         </div>

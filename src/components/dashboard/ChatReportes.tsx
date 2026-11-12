@@ -12,12 +12,6 @@ const SUGERENCIAS = [
   { titulo: 'Tendencia diaria', texto: 'Muéstrame las ventas por día de esta semana' },
 ]
 
-const SCROLL =
-  '[scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.14)_transparent] ' +
-  '[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent ' +
-  '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 ' +
-  'hover:[&::-webkit-scrollbar-thumb]:bg-white/20'
-
 const MASCARA =
   '[mask-image:linear-gradient(to_bottom,transparent,black_28px,black_calc(100%-28px),transparent)]'
 
@@ -98,7 +92,7 @@ function Formateado({ texto }: { texto: string }) {
         if (bloque.tipo === 'tabla') {
           const [encabezados, ...filas] = bloque.filas
           return (
-            <div key={`tabla-${bloque.indice}`} className="overflow-hidden rounded-2xl border border-border/70 bg-background/45 shadow-[0_12px_30px_rgba(0,0,0,0.16)]">
+            <div key={`tabla-${bloque.indice}`} className="overflow-hidden rounded-xl border border-border/70 bg-background/45">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[400px] border-collapse text-left text-xs sm:text-sm">
                   <thead>
@@ -136,7 +130,7 @@ function Formateado({ texto }: { texto: string }) {
         if (item) {
           return (
             <div key={bloque.indice} className="flex gap-2.5">
-              <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-accent-bright" />
+              <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-muted" />
               <span>
                 <Negrita texto={item[1]} />
               </span>
@@ -163,7 +157,8 @@ export default function ChatReportes() {
   const campo = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    fondo.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+    fondo.current?.scrollIntoView({ behavior, block: 'end' })
   }, [mensajes, cargando])
 
   useEffect(() => {
@@ -202,16 +197,21 @@ export default function ChatReportes() {
   const puedeEnviar = entrada.trim().length > 0 && !cargando
 
   return (
-    <div className="flex h-[calc(100dvh-15rem)] min-h-[460px] flex-col">
-      <div className={`flex-1 overflow-y-auto px-1 pr-3 ${SCROLL} ${MASCARA}`}>
+    <div className="flex h-[calc(100dvh-15.5rem)] min-h-0 flex-col">
+      <div
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        className={`flex-1 overflow-y-auto px-1 pr-3 ${MASCARA}`}
+      >
         {vacio ? (
           <div className="flex h-full flex-col items-center justify-center gap-8 py-8 text-center animate-fade-up">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/15 text-primary-bright shadow-[0_0_40px_rgba(99,102,241,0.35)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-surface-2 text-muted">
                 <Chispa className="h-7 w-7" />
               </div>
               <div className="space-y-1">
-                <h2 className="font-display text-2xl font-bold text-ink">¿Qué quieres saber de tu negocio?</h2>
+                <h2 className="font-display text-xl font-semibold text-ink">¿Qué quieres saber de tu negocio?</h2>
                 <p className="text-sm text-muted">Consulto tus ventas, productos y vendedores en tiempo real.</p>
               </div>
             </div>
@@ -220,10 +220,11 @@ export default function ChatReportes() {
               {SUGERENCIAS.map((s) => (
                 <button
                   key={s.texto}
+                  type="button"
                   onClick={() => enviar(s.texto)}
-                  className="group rounded-2xl border border-border/60 bg-surface-2/40 px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 active:scale-[0.98]"
+                  className="group min-h-20 rounded-lg border border-border/80 bg-surface-2/40 px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-surface-2"
                 >
-                  <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-accent-bright">{s.titulo}</span>
+                  <span className="block text-xs font-medium text-muted">{s.titulo}</span>
                   <span className="mt-1 block text-sm text-ink/80 group-hover:text-ink">{s.texto}</span>
                 </button>
               ))}
@@ -234,13 +235,13 @@ export default function ChatReportes() {
             {mensajes.map((m, i) =>
               m.rol === 'usuario' ? (
                 <div key={i} className="flex justify-end animate-fade-up">
-                  <div className="max-w-[85%] whitespace-pre-wrap rounded-3xl rounded-br-md border border-primary/30 bg-primary/25 px-5 py-3 text-sm leading-relaxed text-ink shadow-[0_4px_20px_rgba(99,102,241,0.15)]">
+                  <div className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm border border-border bg-surface-2 px-4 py-3 text-sm leading-relaxed text-ink">
                     {m.texto}
                   </div>
                 </div>
               ) : (
                 <div key={i} className="flex items-start gap-3 animate-fade-up">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/15 text-primary-bright">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                     <Chispa className="h-4 w-4" />
                   </div>
                   <div className="max-w-[88%] pt-1 text-sm leading-relaxed text-ink/90">
@@ -251,15 +252,15 @@ export default function ChatReportes() {
             )}
 
             {cargando && (
-              <div className="flex items-center gap-3 animate-fade-up">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/15 text-primary-bright">
+              <div role="status" className="flex items-center gap-3 animate-fade-up">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                   <Chispa className="h-4 w-4 animate-pulse" />
                 </div>
                 <div className="flex items-center gap-1.5 pt-1">
                   {[0, 150, 300].map((d) => (
                     <span
                       key={d}
-                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-bright/80"
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted motion-reduce:animate-none"
                       style={{ animationDelay: `${d}ms` }}
                     />
                   ))}
@@ -273,7 +274,7 @@ export default function ChatReportes() {
       </div>
 
       <div className="pt-3">
-        <div className="relative rounded-[28px] border border-border/70 bg-surface-2/60 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:shadow-[0_0_0_4px_rgba(99,102,241,0.12),0_8px_30px_rgba(0,0,0,0.25)]">
+        <div className="relative rounded-xl border border-border bg-surface-2/70 transition-colors focus-within:border-primary-bright">
           <textarea
             ref={campo}
             value={entrada}
@@ -285,15 +286,16 @@ export default function ChatReportes() {
               }
             }}
             rows={1}
+            aria-label="Escribe una pregunta sobre tus reportes"
             placeholder="Pregunta sobre tus ventas…"
-            className={`block max-h-40 w-full resize-none bg-transparent py-4 pl-6 pr-16 text-sm text-ink outline-none placeholder:text-muted ${SCROLL}`}
+            className="block max-h-40 w-full resize-none bg-transparent py-4 pl-4 pr-16 text-sm text-ink placeholder:text-muted focus-visible:outline-2 focus-visible:outline-primary-bright focus-visible:outline-offset-2"
           />
           <button
             type="button"
             onClick={() => enviar(entrada)}
             disabled={!puedeEnviar}
             aria-label="Enviar mensaje"
-            className="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white shadow-[0_0_20px_rgba(99,102,241,0.45)] transition-all hover:scale-105 hover:bg-primary-bright active:scale-95 disabled:scale-100 disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
+            className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-white transition-colors hover:bg-primary-dark disabled:bg-surface-2 disabled:text-muted"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 19V5" />

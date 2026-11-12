@@ -19,11 +19,15 @@ export default function BuscadorProductos({ productos }: { productos: Producto[]
   const busquedaDiferida = useDeferredValue(busqueda)
   const [abierto, setAbierto] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!abierto) return
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setAbierto(false)
+      if (e.key === 'Escape') {
+        setAbierto(false)
+        requestAnimationFrame(() => triggerRef.current?.focus())
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -45,13 +49,16 @@ export default function BuscadorProductos({ productos }: { productos: Producto[]
     <>
       {/* Disparador */}
       <button
+        ref={triggerRef}
         type="button"
+        aria-haspopup="dialog"
+        aria-expanded={abierto}
         onClick={() => {
           setBusqueda('')
           setAbierto(true)
           requestAnimationFrame(() => inputRef.current?.focus())
         }}
-        className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-left text-sm text-muted transition hover:border-primary-bright/60 sm:w-72"
+        className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-left text-sm text-muted transition-colors hover:border-primary-bright/60 sm:w-72"
       >
         <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
           <circle cx="9" cy="9" r="6" />
@@ -63,14 +70,37 @@ export default function BuscadorProductos({ productos }: { productos: Producto[]
       {/* Modal de búsqueda */}
       {abierto && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="buscar-producto-titulo"
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[10vh] backdrop-blur-sm"
-          onClick={() => setAbierto(false)}
+          onClick={() => {
+            setAbierto(false)
+            requestAnimationFrame(() => triggerRef.current?.focus())
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== 'Tab') return
+            const elementos = event.currentTarget.querySelectorAll<HTMLElement>(
+              'input:not(:disabled), a[href], button:not(:disabled)'
+            )
+            const primero = elementos[0]
+            const ultimo = elementos[elementos.length - 1]
+            if (!primero || !ultimo) return
+            if (event.shiftKey && document.activeElement === primero) {
+              event.preventDefault()
+              ultimo.focus()
+            } else if (!event.shiftKey && document.activeElement === ultimo) {
+              event.preventDefault()
+              primero.focus()
+            }
+          }}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-border bg-surface shadow-[0_30px_60px_rgba(0,0,0,0.4)]"
+            className="w-full max-w-lg rounded-xl border border-border bg-surface"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+              <h2 id="buscar-producto-titulo" className="sr-only">Buscar producto para editar</h2>
               <svg className="h-4 w-4 shrink-0 text-muted" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="9" cy="9" r="6" />
                 <path d="m17 17-3.5-3.5" strokeLinecap="round" />
@@ -88,17 +118,20 @@ export default function BuscadorProductos({ productos }: { productos: Producto[]
   data-lpignore="true"
   data-form-type="other"
   inputMode="search"
-  className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted"
+  className="min-h-11 w-full bg-transparent text-sm text-ink placeholder:text-muted focus-visible:outline-2 focus-visible:outline-primary-bright focus-visible:outline-offset-2"
   value={busqueda}
   onChange={(e) => setBusqueda(e.target.value)}
   placeholder="Buscar por nombre o código"
 />
               <button
                 type="button"
-                onClick={() => setAbierto(false)}
-                className="rounded-md border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted hover:text-ink"
+                onClick={() => {
+                  setAbierto(false)
+                  requestAnimationFrame(() => triggerRef.current?.focus())
+                }}
+                className="min-h-11 rounded-md border border-border px-3 text-xs text-muted transition-colors hover:text-ink"
               >
-                Esc
+                Cerrar
               </button>
             </div>
 
@@ -114,7 +147,7 @@ export default function BuscadorProductos({ productos }: { productos: Producto[]
                       key={producto.id}
                       href={`/productos/${producto.id}/editar`}
                       onClick={() => setAbierto(false)}
-                      className="flex w-full items-center gap-3 rounded-xl border border-border bg-background/60 p-2.5 text-left transition hover:border-primary-bright/60 hover:bg-surface-2"
+                      className="flex min-h-14 w-full items-center gap-3 rounded-lg border border-border bg-background/60 p-2.5 text-left transition-colors hover:border-primary-bright/50 hover:bg-surface-2"
                     >
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
                         {producto.imagen_url ? (

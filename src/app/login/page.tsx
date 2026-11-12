@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import PageLoading from '@/components/ui/PageLoading'
+import Skeleton from '@/components/ui/Skeleton'
 
 const RUTAS_POR_ROL: Record<string, string> = {
   super_admin: '/usuarios',
@@ -114,82 +116,87 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 isolate overflow-y-auto bg-background font-sans lg:overflow-hidden">
+    <div className="login-page fixed inset-0 isolate overflow-y-auto bg-background font-sans lg:overflow-hidden">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[min(44rem,85vh)] bg-[url('/top-atmosphere.svg')] bg-cover bg-[center_38%] opacity-90"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[min(36rem,78vh)] bg-[url('/top-atmosphere.svg')] bg-cover bg-[center_38%] opacity-20"
       />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,0.14),transparent_55%),linear-gradient(to_bottom,rgba(9,13,22,0.12),#090d16_78%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-1/3 h-80 w-80 rounded-full bg-primary/20 blur-[120px]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-36 bottom-0 h-96 w-96 rounded-full bg-cyan-400/10 blur-[130px]" />
 
-      <main className="relative z-10 mx-auto grid min-h-dvh w-full max-w-7xl items-center gap-10 px-4 py-8 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
+      <div className="relative z-10 mx-auto grid min-h-dvh w-full max-w-7xl items-center gap-10 px-4 py-8 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
         <section className="hidden max-w-xl lg:block">
-          <div className="mb-10 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 shadow-lg backdrop-blur-xl">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary-bright/30 bg-primary/20 text-primary-bright shadow-[0_0_24px_rgba(129,140,248,0.2)]">
+          <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-border bg-surface/80 px-4 py-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
               <span className="barcode-mark" aria-hidden="true" />
             </span>
             <span className="font-display text-sm font-bold tracking-[0.22em] text-ink">VENTO<span className="text-accent-bright">.</span></span>
-            <span className="h-4 w-px bg-white/15" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Punto de venta</span>
+            <span className="h-4 w-px bg-border" />
+            <span className="text-xs text-muted">Punto de venta</span>
           </div>
 
-          <p className="text-xs font-bold uppercase tracking-[0.32em] text-primary-bright">Tu negocio, bajo control</p>
-          <h1 className="mt-5 max-w-lg text-5xl font-display font-bold leading-[1.12] tracking-tight text-ink xl:text-6xl">
+          <p className="text-sm text-muted">Tu negocio, bajo control</p>
+          <p aria-hidden="true" className="mt-4 max-w-lg text-4xl font-display font-semibold leading-tight tracking-tight text-ink xl:text-5xl">
             Cada venta.
             <br />
-            <span className="bg-gradient-to-r from-primary-bright via-cyan-200 to-accent-bright bg-clip-text text-transparent">Todo en orden.</span>
-          </h1>
-          <p className="mt-6 max-w-md text-base leading-7 text-slate-300/80">
+            Todo en orden.
+          </p>
+          <p className="mt-5 max-w-md text-base leading-7 text-muted">
             Inventario, ventas y caja conectados en un solo espacio para que tu equipo trabaje con claridad.
           </p>
 
-          <div className="mt-12 grid max-w-md grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent-bright/20 bg-accent/10 text-accent-bright">
+          <div className="mt-8 grid max-w-md grid-cols-2 gap-3">
+            <div className="rounded-xl border border-border bg-surface/75 p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-4 w-4"><path d="M4 19V5m0 14h16M7 15l4-4 3 2 5-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
-              <p className="mt-4 text-sm font-semibold text-ink">Visibilidad en tiempo real</p>
+              <p className="mt-3 text-sm font-semibold text-ink">Visibilidad en tiempo real</p>
               <p className="mt-1 text-xs leading-5 text-muted">Decisiones claras para cada jornada.</p>
             </div>
-            <div className="translate-y-5 rounded-2xl border border-white/10 bg-white/[0.055] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
+            <div className="rounded-xl border border-border bg-surface/75 p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-4 w-4"><path d="M12 3 5 6v5c0 4.5 2.9 7.7 7 10 4.1-2.3 7-5.5 7-10V6l-7-3Z" strokeLinejoin="round" /><path d="m9 12 2 2 4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
-              <p className="mt-4 text-sm font-semibold text-ink">Acceso para tu equipo</p>
+              <p className="mt-3 text-sm font-semibold text-ink">Acceso para tu equipo</p>
               <p className="mt-1 text-xs leading-5 text-muted">Cada persona con su rol y terminal.</p>
             </div>
           </div>
-          <p className="mt-14 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Simple para operar · Completo para crecer</p>
+          <p className="mt-8 text-xs text-muted">Simple para operar · Completo para crecer</p>
         </section>
 
-        <section className="mx-auto w-full max-w-md animate-[fadeIn_0.5s_ease-out]">
+        <section className="mx-auto w-full max-w-md">
           <div className="mb-5 flex items-center justify-center gap-2 lg:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary-bright/30 bg-primary/20 text-primary-bright shadow-[0_0_24px_rgba(129,140,248,0.2)]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
               <span className="barcode-mark" aria-hidden="true" />
             </span>
             <span className="font-display text-sm font-bold tracking-[0.22em] text-ink">VENTO<span className="text-accent-bright">.</span></span>
           </div>
 
-          <div className="overflow-hidden rounded-[1.75rem] border border-white/[0.14] bg-surface/80 shadow-[0_30px_100px_rgba(0,0,0,0.55),0_0_60px_rgba(99,102,241,0.12)] backdrop-blur-2xl">
-            <div className="h-px bg-gradient-to-r from-transparent via-cyan-200/70 to-transparent" />
+          <div className="overflow-hidden rounded-2xl border border-border bg-surface/95">
             <div className="p-6 sm:p-9">
               <div className="mb-8">
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary-bright">Acceso seguro</p>
-                <h2 className="mt-2 text-2xl font-display font-bold text-ink">
+                <p className="text-sm text-muted">Acceso seguro</p>
+                <h1 className="mt-2 text-2xl font-display font-bold text-ink">
                   {usuarioSeleccionado ? 'Ingresa tu PIN' : 'Bienvenido'}
-                </h2>
+                </h1>
                 <p className="mt-2 text-sm text-muted">
                   {usuarioSeleccionado ? 'Confirma tu identidad para continuar.' : 'Selecciona tu perfil para entrar a tu espacio.'}
                 </p>
               </div>
 
               {!hydrated ? (
-                <div className="space-y-3">
-                  <div className="h-14 animate-pulse rounded-xl border border-white/10 bg-surface-2" />
-                  <div className="h-14 animate-pulse rounded-xl border border-white/10 bg-surface-2" />
-                </div>
+                <PageLoading className="space-y-2.5">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      key={item}
+                      className="flex min-h-14 items-center gap-3 rounded-lg border border-border bg-surface-2/80 p-3.5"
+                    >
+                      <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-32 max-w-full" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  ))}
+                </PageLoading>
               ) : !usuarioSeleccionado ? (
                 <div className="space-y-2.5">
                   {usuarios.length === 0 ? (
@@ -205,14 +212,14 @@ export default function LoginPage() {
                           setError('')
                           setPin('')
                         }}
-                        className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-surface-2/80 p-3.5 text-left shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition hover:-translate-y-0.5 hover:border-primary-bright/40 hover:bg-surface-2 disabled:opacity-40"
+                        className="group flex min-h-14 w-full items-center gap-3 rounded-lg border border-border bg-surface-2/80 p-3.5 text-left transition-colors hover:border-primary-bright/40 hover:bg-surface-2 disabled:opacity-40"
                       >
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary-bright/20 bg-primary/15 font-display text-sm font-bold uppercase text-primary-bright">
                           {usuario.nombre.trim().slice(0, 1)}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold text-ink">{usuario.nombre}</span>
-                          <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{ETIQUETAS_ROL[usuario.rol] ?? usuario.rol}</span>
+                          <span className="mt-0.5 block text-xs text-muted">{ETIQUETAS_ROL[usuario.rol] ?? usuario.rol}</span>
                         </span>
                         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-primary-bright"><path d="M5 12h14m-6-6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </button>
@@ -221,41 +228,40 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="mb-5 flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] py-2 pl-2 pr-4">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-primary-bright/20 bg-primary/15 font-display text-sm font-bold uppercase text-primary-bright">
+                  <div className="mb-5 flex items-center gap-3 rounded-full border border-border bg-surface-2/70 py-2 pl-2 pr-4">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface font-display text-sm font-semibold text-muted">
                       {usuarioSeleccionado.nombre.trim().slice(0, 1)}
                     </span>
                     <span>
-                      <span className="block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted">Accediendo como</span>
+                      <span className="block text-xs text-muted">Accediendo como</span>
                       <span className="block max-w-[14rem] truncate text-sm font-semibold text-ink">{usuarioSeleccionado.nombre}</span>
                     </span>
                   </div>
 
-                  <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-background/80 px-4 py-4 shadow-inner">
-                    <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px)' }} />
-                    <div className="relative flex justify-center gap-4">
+                  <div className="w-full rounded-xl border border-border bg-background/80 px-4 py-4">
+                    <div className="flex justify-center gap-4">
                       {[0, 1, 2, 3].map((i) => {
                         const activo = i < pin.length
-                        return <div key={i} className={`h-3 w-3 rounded-full border transition-all duration-150 ${activo ? 'border-primary-bright bg-primary-bright shadow-[0_0_18px_3px_rgba(129,140,248,0.65)]' : 'border-slate-600 bg-slate-800/80'}`} />
+                        return <div key={i} className={`h-3 w-3 rounded-full border transition-colors ${activo ? 'border-primary-bright bg-primary-bright' : 'border-slate-600 bg-slate-800/80'}`} />
                       })}
                     </div>
                   </div>
 
                   <div className="mt-5 grid grid-cols-3 gap-2.5">
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((n) => (
-                      <button key={n} type="button" disabled={cargando} onClick={() => manejarDigito(n)} className="h-12 w-16 rounded-xl border border-white/10 bg-surface-2/90 font-display text-lg font-bold text-ink shadow-[0_5px_14px_rgba(0,0,0,0.18)] transition hover:border-primary-bright/30 hover:bg-surface-2 active:scale-95 disabled:opacity-40 sm:h-14 sm:w-20">
+                      <button key={n} type="button" disabled={cargando} onClick={() => manejarDigito(n)} className="h-12 w-16 rounded-lg border border-border bg-surface-2/90 font-display text-lg font-semibold text-ink transition-colors hover:border-primary-bright/30 hover:bg-surface-2 disabled:opacity-40 sm:h-14 sm:w-20">
                         {n}
                       </button>
                     ))}
-                    <button type="button" onClick={() => setPin((p) => p.slice(0, -1))} disabled={cargando} className="h-12 w-16 rounded-xl border border-white/10 bg-white/[0.035] text-[10px] font-bold uppercase tracking-wider text-muted transition hover:border-danger/30 hover:text-danger active:scale-95 disabled:opacity-40 sm:h-14 sm:w-20">Borrar</button>
-                    <button type="button" disabled={cargando} onClick={() => manejarDigito('0')} className="h-12 w-16 rounded-xl border border-white/10 bg-surface-2/90 font-display text-lg font-bold text-ink shadow-[0_5px_14px_rgba(0,0,0,0.18)] transition hover:border-primary-bright/30 hover:bg-surface-2 active:scale-95 disabled:opacity-40 sm:h-14 sm:w-20">0</button>
-                    <button type="button" onClick={resetearSeleccion} disabled={cargando} className="h-12 w-16 rounded-xl border border-white/10 bg-white/[0.035] text-[10px] font-bold uppercase tracking-wider text-muted transition hover:border-primary-bright/30 hover:text-ink active:scale-95 disabled:opacity-40 sm:h-14 sm:w-20">Volver</button>
+                    <button type="button" onClick={() => setPin((p) => p.slice(0, -1))} disabled={cargando} className="h-12 w-16 rounded-lg border border-border bg-surface/50 text-xs font-semibold text-muted transition-colors hover:border-danger/30 hover:text-danger disabled:opacity-40 sm:h-14 sm:w-20">Borrar</button>
+                    <button type="button" disabled={cargando} onClick={() => manejarDigito('0')} className="h-12 w-16 rounded-lg border border-border bg-surface-2/90 font-display text-lg font-semibold text-ink transition-colors hover:border-primary-bright/30 hover:bg-surface-2 disabled:opacity-40 sm:h-14 sm:w-20">0</button>
+                    <button type="button" onClick={resetearSeleccion} disabled={cargando} className="h-12 w-16 rounded-lg border border-border bg-surface/50 text-xs font-semibold text-muted transition-colors hover:border-primary-bright/30 hover:text-ink disabled:opacity-40 sm:h-14 sm:w-20">Volver</button>
                   </div>
                 </div>
               )}
 
               {cargando && (
-                <p className="mt-5 flex items-center justify-center gap-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-primary-bright">
+                <p role="status" className="mt-5 flex items-center justify-center gap-2 text-center text-sm text-muted">
                   <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary-bright/30 border-t-primary-bright" />
                   Verificando acceso
                 </p>
@@ -264,34 +270,16 @@ export default function LoginPage() {
                 <p role="alert" className="mt-4 rounded-xl border border-danger/20 bg-danger/10 px-3 py-2.5 text-center text-xs font-medium text-rose-200">{error}</p>
               )}
 
-              <div className="mt-7 flex items-center justify-center gap-2 border-t border-white/[0.08] pt-5 text-[10px] text-slate-500">
+              <div className="mt-7 flex items-center justify-center gap-2 border-t border-border pt-5 text-xs text-muted">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-3.5 w-3.5"><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 1 1 8 0v3" strokeLinecap="round" /></svg>
                 Sesión protegida · Vento
               </div>
             </div>
           </div>
-          <p className="mt-5 text-center text-[10px] text-slate-500 lg:text-right">Una plataforma creada para que tu negocio siga avanzando.</p>
+          <p className="mt-5 text-center text-xs text-muted lg:text-right">Una plataforma creada para que tu negocio siga avanzando.</p>
         </section>
-      </main>
+      </div>
 
-      <style jsx global>{`
-        html,
-        body {
-          overflow: hidden;
-          overscroll-behavior: none;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(6px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-      `}</style>
     </div>
   )
 }

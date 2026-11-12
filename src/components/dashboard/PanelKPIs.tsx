@@ -1,7 +1,7 @@
 // src/components/dashboard/PanelKPIs.tsx
 'use client'
 
-import { useEffect, useState, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { IconoAprobacion, IconoCheck, IconoFactura, IconoFlecha, IconoVentas } from './iconos'
 
 type Props = {
@@ -82,7 +82,7 @@ function Cambio({ actual, anterior, p }: { actual: number; anterior: number; p: 
   if (anterior <= 0) {
     const nuevo = actual > 0
     return (
-      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${nuevo ? 'bg-accent/10 text-accent-bright' : 'bg-white/[0.06] text-muted'}`}>
+      <span className={`inline-flex items-center gap-1 text-xs font-medium ${nuevo ? 'text-accent-bright' : 'text-muted'}`}>
         {nuevo ? <IconoFlecha className="h-3 w-3 -rotate-90" /> : null}
         {nuevo ? 'Nuevo' : 'Sin base'}
       </span>
@@ -93,7 +93,7 @@ function Cambio({ actual, anterior, p }: { actual: number; anterior: number; p: 
   const mejora = porcentaje >= 0
 
   return (
-    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold tabular-nums ${mejora ? 'bg-accent/10 text-accent-bright' : 'bg-danger/10 text-danger'}`}>
+    <span className={`inline-flex shrink-0 items-center gap-1 text-xs font-medium tabular-nums ${mejora ? 'text-accent-bright' : 'text-danger'}`}>
       <IconoFlecha className={`h-3 w-3 ${mejora ? '-rotate-90' : 'rotate-90'}`} />
       {mejora ? '+' : ''}{numero(Math.round(porcentaje * p))}%
     </span>
@@ -162,11 +162,9 @@ function TarjetaKPI({
   horaActual: number
 }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-gradient-to-br from-surface/65 via-surface/55 to-surface/45 p-3.5 shadow-[0_14px_34px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-colors hover:border-primary-bright/30">
+    <article className="rounded-xl border border-border/70 bg-surface/65 p-4 transition-colors hover:border-border">
       <div className="flex items-center justify-between gap-3">
-        <span className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] ${color}`}>
-          {icono}
-        </span>
+        <span className="flex h-5 w-5 items-center justify-center text-muted">{icono}</span>
         <Cambio actual={actual} anterior={anterior} p={progreso} />
       </div>
       <p className="mt-3 truncate text-2xl font-display font-bold tabular-nums tracking-tight text-ink">
@@ -174,7 +172,7 @@ function TarjetaKPI({
       </p>
       <p className="mt-0.5 truncate text-xs font-semibold text-ink/90">{etiqueta}</p>
       <div className="mt-2 flex min-h-7 items-end justify-between gap-1.5">
-        <p className="line-clamp-2 text-[9px] leading-3.5 text-muted">{detalle}</p>
+        <p className="line-clamp-2 text-xs leading-4 text-muted">{detalle}</p>
         <MiniGrafico actual={actualPorHora} anterior={anteriorPorHora} horaActual={horaActual} progreso={progreso} color={color} />
       </div>
     </article>
@@ -207,15 +205,54 @@ function AreaVentas({ valores, p }: { valores: number[]; p: number }) {
     setActivo(Math.min(n - 1, Math.max(0, Math.round(x * (n - 1)))))
   }
 
+  const moverConTeclado = (e: KeyboardEvent<HTMLDivElement>) => {
+    let siguiente: number
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        siguiente = Math.max(0, (activo ?? 0) - 1)
+        break
+      case 'ArrowRight':
+      case 'ArrowUp':
+        siguiente = Math.min(n - 1, (activo ?? 0) + 1)
+        break
+      case 'Home':
+        siguiente = 0
+        break
+      case 'End':
+        siguiente = n - 1
+        break
+      default:
+        return
+    }
+
+    e.preventDefault()
+    setActivo(siguiente)
+  }
+
+  const indiceActivo = activo ?? 0
+
   return (
     <div className="mt-6">
       <div
-        className="relative h-48 touch-pan-y text-primary-bright"
+        role="slider"
+        tabIndex={0}
+        aria-label="Ventas por hora"
+        aria-describedby="area-ventas-instrucciones"
+        aria-orientation="horizontal"
+        aria-valuemin={0}
+        aria-valuemax={n - 1}
+        aria-valuenow={indiceActivo}
+        aria-valuetext={`${hora12(horas[indiceActivo])}: ${dinero(datos[indiceActivo])}`}
+        onKeyDown={moverConTeclado}
+        onFocus={() => setActivo(indiceActivo)}
+        onBlur={() => setActivo(null)}
+        className="relative h-48 touch-pan-y rounded-lg text-primary-bright"
         onPointerMove={mover}
         onPointerDown={mover}
         onPointerLeave={() => setActivo(null)}
       >
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
+        <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
           <defs>
             <linearGradient id="areaVentas" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
@@ -276,7 +313,10 @@ function AreaVentas({ valores, p }: { valores: number[]; p: number }) {
         )}
       </div>
 
-      <div className="relative mt-2 h-4 text-[10px] text-muted">
+      <span id="area-ventas-instrucciones" className="sr-only">
+        Usa las teclas de flecha para explorar las ventas por hora; inicio y fin van al primer o último horario.
+      </span>
+      <div className="relative mt-2 h-4 text-[11px] text-muted">
         {horas.map((h, i) =>
           h % 3 === 0 ? (
             <span key={h} className="absolute -translate-x-1/2" style={{ left: `${xDe(i)}%` }}>
@@ -321,7 +361,7 @@ export default function PanelKPIs({
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <TarjetaKPI
           icono={<IconoVentas className="h-4 w-4" />}
-          color="text-rose-300"
+          color="text-primary-bright/75"
           valor={dinero(Math.round(ingresoHoy * p))}
           etiqueta="Ventas de hoy"
           detalle={`${numero(Math.round(facturasProcesadas * p))} facturas aprobadas`}
@@ -334,7 +374,7 @@ export default function PanelKPIs({
         />
         <TarjetaKPI
           icono={<IconoFactura className="h-4 w-4" />}
-          color="text-sky-300"
+          color="text-primary-bright/75"
           valor={numero(Math.round(facturasProcesadas * p))}
           etiqueta="Facturas aprobadas"
           detalle={`${numero(Math.round(facturasAyerMismaHora * p))} ayer a esta hora`}
@@ -352,7 +392,7 @@ export default function PanelKPIs({
               <path d="M12 7v5l3 2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           }
-          color="text-amber-300"
+          color="text-primary-bright/75"
           valor={dinero(Math.round(ticketPromedio * p))}
           etiqueta="Ticket promedio"
           detalle={`Ayer a esta hora: ${dinero(Math.round(ticketAyerMismaHora * p))}`}
@@ -363,14 +403,10 @@ export default function PanelKPIs({
           anteriorPorHora={ticketAyerPorHora}
           horaActual={horaActual}
         />
-        <article className="rounded-2xl border border-primary-bright/20 bg-gradient-to-br from-primary-bright/10 via-surface/65 to-surface/50 p-3.5 shadow-[0_14px_34px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl">
+        <article className="rounded-xl border border-border/70 bg-surface/65 p-4">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary-bright/15 bg-primary-bright/10 text-primary-bright">
+            <span className="flex h-5 w-5 items-center justify-center text-muted">
               <IconoFactura className="h-4 w-4" />
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary-bright/10 px-2 py-1 text-[9px] font-bold text-primary-bright">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-bright" />
-              En vivo
             </span>
           </div>
           <p className="mt-3 text-2xl font-display font-bold tabular-nums tracking-tight text-ink">
@@ -381,19 +417,19 @@ export default function PanelKPIs({
             <div className="flex h-1.5 overflow-hidden rounded-full bg-surface-2">
               {totalFacturas > 0 && (
                 <>
-                  <span className="h-full bg-primary-bright transition-all" style={{ width: `${(enEspera / totalFacturas) * 100 * p}%` }} />
-                  <span className="h-full bg-accent-bright transition-all" style={{ width: `${(aceptadas / totalFacturas) * 100 * p}%` }} />
+                  <span className="h-full bg-primary-bright" style={{ width: `${(enEspera / totalFacturas) * 100 * p}%` }} />
+                  <span className="h-full bg-accent-bright" style={{ width: `${(aceptadas / totalFacturas) * 100 * p}%` }} />
                 </>
               )}
             </div>
-            <p className="mt-1.5 truncate text-[9px] leading-3.5 text-muted">
+            <p className="mt-1.5 truncate text-[11px] leading-4 text-muted">
               {numero(Math.round(enEspera * p))} esperando · {numero(Math.round(aceptadas * p))} aceptadas
             </p>
           </div>
         </article>
       </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-surface/80 px-3.5 py-2.5 shadow-[0_10px_26px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-surface/65 px-3.5 py-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${totalSolicitudes > 0 ? 'border-amber-300/15 bg-amber-300/10 text-amber-200' : 'border-accent/15 bg-accent/10 text-accent-bright'}`}>
             {totalSolicitudes > 0 ? <IconoAprobacion className="h-4 w-4" /> : <IconoCheck className="h-4 w-4" />}
@@ -408,25 +444,24 @@ export default function PanelKPIs({
         <div className="flex shrink-0 items-center gap-3">
           <span className="text-lg font-display font-bold tabular-nums text-ink">{numero(Math.round(totalSolicitudes * p))}</span>
           {totalSolicitudes > 0 && (
-            <a href="#solicitudes" className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-200 hover:underline">
+            <a href="#solicitudes" className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 text-[10px] font-semibold text-amber-200 hover:underline">
               Revisar <IconoFlecha className="h-3 w-3" />
             </a>
           )}
         </div>
       </div>
 
-      <section className="card relative overflow-hidden">
-        <div className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
-        <div className="relative">
+      <section className="rounded-xl border border-border/70 bg-surface/65 p-4 sm:p-5">
+        <div>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-bright">Rendimiento del día</p>
-              <h2 className="mt-1 text-lg font-display font-bold text-ink">Ventas por hora</h2>
-              <p className="mt-1 text-xs text-muted">Comportamiento de las ventas aprobadas durante el día.</p>
+              <p className="text-xs font-medium text-muted">Rendimiento del día</p>
+              <h2 className="mt-1 text-balance text-base font-semibold text-ink">Ventas por hora</h2>
+              <p className="mt-1 text-sm text-muted">Comportamiento de las ventas aprobadas durante el día.</p>
             </div>
-            <div className="rounded-xl border border-border/70 bg-surface-2/50 px-4 py-2.5 text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Hora pico</p>
-              <p className="mt-0.5 text-base font-display font-bold tabular-nums text-ink">
+            <div className="text-right">
+              <p className="text-xs text-muted">Hora pico</p>
+              <p className="mt-0.5 text-sm font-semibold tabular-nums text-ink">
                 {horaPico >= 0 ? hora12(horaPico) : '—'}
               </p>
             </div>

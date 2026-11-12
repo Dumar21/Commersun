@@ -43,23 +43,23 @@ export default async function VentasPage({
   const facturasVisibles = facturasLista.slice(0, FACTURAS_POR_PAGINA)
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary-bright">Gestión Comercial</p>
-          <h1 className="text-3xl font-display font-bold text-ink">Mis facturas</h1>
+          <p className="text-sm text-muted">Ventas</p>
+          <h1 className="text-2xl font-display font-semibold text-ink">Mis facturas</h1>
         </div>
         <Link href="/ventas/nueva" className="btn-primary">+ Nueva factura</Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface/80 shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-surface/90">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border/70 bg-surface-2/75 text-left text-muted">
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Factura</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Total</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Estado</th>
+              <tr className="border-b border-border/70 bg-surface-2/60 text-left text-muted">
+                <th className="px-5 py-3.5 text-xs font-semibold">Factura</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Total</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Estado</th>
                 <th className="px-5 py-3.5"></th>
               </tr>
             </thead>
@@ -79,18 +79,18 @@ export default async function VentasPage({
                 </tr>
               ) : (
                 facturasVisibles.map((factura) => (
-                  <tr key={factura.id} className="group transition-colors hover:bg-primary/[0.04]">
+                  <tr key={factura.id} className="transition-colors hover:bg-surface-2/60">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary-bright/15 bg-primary/10 text-primary-bright">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-4 w-4">
                             <path d="M5 3h10v14l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2V3Z" strokeLinejoin="round" />
                             <path d="M7 7h6M7 10h6" strokeLinecap="round" />
                           </svg>
                         </span>
                         <div>
-                          <p className="text-xs font-semibold text-ink">Factura #{factura.id.slice(0, 8)}</p>
-                          <p className="mt-0.5 text-[10px] text-muted">
+                          <p className="text-sm font-semibold text-ink">Factura #{factura.id.slice(0, 8)}</p>
+                          <p className="mt-0.5 text-xs text-muted">
                             {new Date(factura.fecha_hora).toLocaleString('es-CO', {
                               day: '2-digit',
                               month: 'short',
@@ -106,7 +106,7 @@ export default async function VentasPage({
                       <span className="text-sm font-bold tabular-nums text-ink">${factura.total.toLocaleString('es-CO')}</span>
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider ${
+                      <span className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-medium ${
                         factura.estado === 'pagada' ? 'bg-accent/10 text-accent-bright border border-accent/20' :
                         factura.estado === 'cancelada' ? 'bg-danger/10 text-danger border border-danger/20' :
                         'bg-primary/10 text-primary-bright border border-primary/20'
@@ -116,7 +116,7 @@ export default async function VentasPage({
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       {factura.estado === 'borrador' && (
-                        <Link href={`/ventas/${factura.id}`} className="inline-flex items-center gap-1 rounded-lg border border-primary-bright/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-bright transition hover:bg-primary/10">
+                        <Link href={`/ventas/${factura.id}`} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-primary-bright/20 px-3 py-2 text-xs font-semibold text-primary-bright transition-colors hover:bg-primary/10">
                           Continuar <span aria-hidden="true">→</span>
                         </Link>
                       )}
@@ -132,7 +132,7 @@ export default async function VentasPage({
             {pagina > 1 ? (
               <Link
                 href={`/ventas?pagina=${pagina - 1}`}
-                className="text-sm font-semibold text-primary-bright transition hover:text-ink"
+                className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary-bright transition-colors hover:text-ink"
               >
                 ← Anteriores
               </Link>
@@ -141,7 +141,7 @@ export default async function VentasPage({
             {haySiguientePagina ? (
               <Link
                 href={`/ventas?pagina=${pagina + 1}`}
-                className="text-sm font-semibold text-primary-bright transition hover:text-ink"
+                className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary-bright transition-colors hover:text-ink"
               >
                 Siguientes →
               </Link>

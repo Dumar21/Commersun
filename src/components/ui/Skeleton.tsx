@@ -8,6 +8,7 @@ interface Props {
 export default function Skeleton({ className = '', width, height, circle }: Props) {
   return (
     <div
+      aria-hidden="true"
       className={`skeleton ${circle ? 'rounded-full' : ''} ${className}`}
       style={{
         width: width ?? undefined,

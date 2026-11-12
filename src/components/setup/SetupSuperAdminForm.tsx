@@ -37,8 +37,9 @@ export default function SetupSuperAdminForm() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="field-label">Nombre del super_admin</label>
+        <label htmlFor="setup-nombre" className="field-label">Nombre del super_admin</label>
         <input
+          id="setup-nombre"
           type="text"
           className="field-input"
           value={nombre}
@@ -47,17 +48,20 @@ export default function SetupSuperAdminForm() {
         />
       </div>
       <div>
-        <label className="field-label">PIN</label>
+        <label htmlFor="setup-pin" className="field-label">PIN</label>
         <input
-          type="text"
+          id="setup-pin"
+          type="password"
+          inputMode="numeric"
+          autoComplete="new-password"
           className="field-input"
           value={pin}
-          onChange={(e) => setPin(e.target.value)}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
           placeholder="4 dígitos"
           maxLength={4}
         />
       </div>
-      {error && <p className="text-danger text-sm">{error}</p>}
+      {error && <p role="alert" className="text-danger text-sm">{error}</p>}
       <button type="button" className="btn-primary w-full" onClick={handleCrear} disabled={cargando}>
         {cargando ? 'Creando...' : 'Crear super_admin'}
       </button>

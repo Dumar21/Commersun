@@ -137,6 +137,47 @@ export type Database = {
           creado_por?: string | null
         }
       >
+      audit_logs: Table<
+        {
+          id: string
+          created_at: string
+          actor_id: string | null
+          actor_name: string
+          actor_role: Rol | 'sistema'
+          action: string
+          entity_type: string
+          entity_id: string | null
+          summary: string
+          details: Json
+          result: 'in_progress' | 'success' | 'failure'
+        },
+        {
+          id?: string
+          created_at?: string
+          actor_id?: string | null
+          actor_name: string
+          actor_role: Rol | 'sistema'
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          summary: string
+          details?: Json
+          result?: 'in_progress' | 'success' | 'failure'
+        },
+        {
+          id?: string
+          created_at?: string
+          actor_id?: string | null
+          actor_name?: string
+          actor_role?: Rol | 'sistema'
+          action?: string
+          entity_type?: string
+          entity_id?: string | null
+          summary?: string
+          details?: Json
+          result?: 'in_progress' | 'success' | 'failure'
+        }
+      >
       ventas: Table<
         {
           id: string

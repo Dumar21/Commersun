@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { ejecutarConAuditoria } from '@/lib/audit-log'
 
 export async function POST(request: NextRequest) {
   const { nombre, pin } = await request.json()
@@ -25,15 +26,34 @@ export async function POST(request: NextRequest) {
 
   const pinHash = await bcrypt.hash(pin, 10)
 
-  const { error } = await supabaseAdmin.from('usuarios').insert({
-    nombre,
-    rol: 'super_admin',
-    pin_hash: pinHash,
-    activo: true,
-  })
+  const resultado = await ejecutarConAuditoria(
+    { sub: null, nombre: 'Sistema', rol: 'sistema' },
+    {
+      action: 'system.setup',
+      entityType: 'usuario',
+      summary: `Configuración inicial: creó la cuenta ${nombre.trim()}`,
+      details: { nombre: nombre.trim(), rol: 'super_admin' },
+    },
+    async (setEntityId) => {
+      const { data: usuario, error } = await supabaseAdmin
+        .from('usuarios')
+        .insert({
+          nombre: nombre.trim(),
+          rol: 'super_admin',
+          pin_hash: pinHash,
+          activo: true,
+        })
+        .select('id')
+        .single()
 
-  if (error) {
-    return NextResponse.json({ error: 'No se pudo crear el super_admin' }, { status: 500 })
+      if (error || !usuario) return { error: 'No se pudo crear el super_admin' }
+      setEntityId(usuario.id)
+      return { ok: true }
+    },
+  )
+
+  if ('error' in resultado) {
+    return NextResponse.json({ error: resultado.error }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

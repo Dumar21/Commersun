@@ -28,11 +28,11 @@ export default async function ProductosPage() {
   const productosCatalogo: ProductoCatalogo[] = productos
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary-bright">Gestión de Inventario</p>
-          <h1 className="text-3xl font-display font-bold text-ink">Catálogo de Productos</h1>
+          <p className="text-sm text-muted">Inventario</p>
+          <h1 className="text-2xl font-display font-semibold text-ink">Catálogo de productos</h1>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -51,16 +51,16 @@ export default async function ProductosPage() {
 
       <EntradaInventario />
 
-      <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface/80 shadow-[0_16px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-surface/90">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
-              <tr className="border-b border-border/70 bg-surface-2/75 text-left text-muted">
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Producto</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Precio detal</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Precio mayor</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Existencias</th>
-                <th className="px-5 py-3.5 font-bold uppercase tracking-[0.16em] text-[9px]">Código</th>
+              <tr className="border-b border-border/70 bg-surface-2/60 text-left text-muted">
+                <th className="px-5 py-3.5 text-xs font-semibold">Producto</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Precio detal</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Precio mayor</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Existencias</th>
+                <th className="px-5 py-3.5 text-xs font-semibold">Código</th>
                 <th className="px-5 py-3.5"></th>
               </tr>
             </thead>
@@ -70,16 +70,16 @@ export default async function ProductosPage() {
                   <td colSpan={6} className="px-6 py-14 text-center">
                     <p className="text-sm font-semibold text-ink">Aún no hay productos</p>
                     <p className="mt-1 text-xs text-muted">Agrega el primer producto para empezar a gestionar tu inventario.</p>
-                    <Link href="/productos/nuevo" className="mt-4 inline-flex rounded-lg border border-primary-bright/20 px-3 py-1.5 text-xs font-bold text-primary-bright transition hover:bg-primary/10">
+                    <Link href="/productos/nuevo" className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-primary-bright/20 px-3 py-2 text-sm font-semibold text-primary-bright transition-colors hover:bg-primary/10">
                       Agregar producto
                     </Link>
                   </td>
                 </tr>
               ) : productosCatalogo.map((producto) => (
-                <tr key={producto.id} className="group transition-colors hover:bg-primary/[0.04]">
+                <tr key={producto.id} className="transition-colors hover:bg-surface-2/60">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="h-11 w-11 overflow-hidden rounded-xl border border-border/80 bg-surface-2 shadow-sm">
+                      <div className="h-11 w-11 overflow-hidden rounded-lg border border-border/80 bg-surface-2">
                         {producto.imagen_url ? (
                           <Image
                             src={producto.imagen_url}
@@ -111,7 +111,7 @@ export default async function ProductosPage() {
                   </td>
                   <td className="px-5 py-3.5 font-mono text-xs text-muted">{producto.codigo_barras || '—'}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <Link href={`/productos/${producto.id}/editar`} className="inline-flex rounded-lg border border-border/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-bright transition hover:border-primary-bright/30 hover:bg-primary/10">Editar</Link>
+                    <Link href={`/productos/${producto.id}/editar`} className="inline-flex min-h-11 items-center rounded-lg border border-border/70 px-3 py-2 text-xs font-semibold text-primary-bright transition-colors hover:border-primary-bright/30 hover:bg-primary/10">Editar</Link>
                   </td>
                 </tr>
               ))}

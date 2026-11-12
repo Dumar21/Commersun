@@ -16,11 +16,11 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary-bright">Inventario</p>
-        <h1 className="text-3xl font-display font-bold text-ink">Editar producto</h1>
-        <p className="text-sm text-muted">Estás editando: <span className="font-semibold text-primary-bright">{producto.nombre}</span></p>
+        <p className="text-sm text-muted">Inventario</p>
+        <h1 className="text-2xl font-display font-semibold text-ink">Editar producto</h1>
+        <p className="text-sm text-muted">Estás editando: <span className="font-semibold text-ink">{producto.nombre}</span></p>
       </div>
       <FormularioProducto producto={producto} />
     </div>

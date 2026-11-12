@@ -13,10 +13,10 @@ export default async function UsuariosPage() {
     .order('nombre', { ascending: true })
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary-bright">Gestión de Usuarios</p>
-        <h1 className="text-3xl font-display font-bold text-ink">Administrar usuarios</h1>
+        <p className="text-sm text-muted">Equipo</p>
+        <h1 className="text-2xl font-display font-semibold text-ink">Administrar usuarios</h1>
       </div>
       <UsuariosAdminPanel
         currentRol={sesion.rol}

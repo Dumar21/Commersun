@@ -6,10 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --incremental false",
+    "ci": "npm run lint && npm run typecheck"
   },
   "dependencies": {
     "@google/genai": "^3.0.0",
+    "@radix-ui/react-select": "^2.4.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",
     "animejs": "^4.5.0",

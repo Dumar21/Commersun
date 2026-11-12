@@ -1,9 +1,9 @@
 // src/components/ventas/NuevaFactura.tsx
 'use client'
 
-import type React from 'react'
 import Image from 'next/image'
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import * as Select from '@radix-ui/react-select'
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { crearFactura, actualizarFactura, confirmarFactura } from '@/app/ventas/actions'
 
@@ -28,18 +28,6 @@ interface Props {
   itemsIniciales?: ItemForm[]
 }
 
-// Select temático: sin apariencia nativa del navegador, con flecha propia en cyan
-const selectClass =
-  'w-full truncate appearance-none rounded-lg border border-border bg-background/60 py-1.5 pl-2.5 pr-7 text-sm font-semibold text-ink outline-none transition focus:border-primary-bright/60 focus:ring-1 focus:ring-primary-bright/30'
-
-const selectChevronStyle: React.CSSProperties = {
-  backgroundImage:
-    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2333c7e0' stroke-width='1.8'%3E%3Cpath d='m5 8 5 5 5-5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 0.55rem center',
-  backgroundSize: '13px',
-}
-
 export default function NuevaFactura({ productos, facturaId, itemsIniciales }: Props) {
   const router = useRouter()
   const [items, setItems] = useState<ItemForm[]>(itemsIniciales ?? [])
@@ -51,15 +39,21 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
   const [busqueda, setBusqueda] = useState('')
   const busquedaDiferida = useDeferredValue(busqueda)
   const inputRef = useRef<HTMLInputElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  const cerrarBuscador = useCallback(() => {
+    setBuscadorAbierto(false)
+    requestAnimationFrame(() => triggerRef.current?.focus())
+  }, [])
 
   useEffect(() => {
     if (!buscadorAbierto) return
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setBuscadorAbierto(false)
+      if (e.key === 'Escape') cerrarBuscador()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [buscadorAbierto])
+  }, [buscadorAbierto, cerrarBuscador])
 
   const productosFiltrados = useMemo(() => {
     const texto = busquedaDiferida.trim().toLowerCase()
@@ -84,7 +78,7 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
       return [...prev, { id_producto: productoId, cantidad: 1, tipo_venta: 'detal' }]
     })
 
-    setBuscadorAbierto(false)
+    cerrarBuscador()
   }
 
   const actualizarLinea = (index: number, cambios: Partial<ItemForm>) => {
@@ -127,7 +121,7 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
 
     if (!idAConfirmar) {
       const resultadoCrear = await crearFactura(items)
-      if (resultadoCrear.error) {
+      if (!('ok' in resultadoCrear)) {
         setGuardando(false)
         setMensaje(resultadoCrear.error)
         return
@@ -157,44 +151,44 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
 
   return (
     <div className="space-y-6">
-      <div className="card flex flex-col gap-5 bg-[radial-gradient(circle_at_top_left,_rgba(51,199,224,0.18),transparent_40%)]">
+      <div className="card flex flex-col gap-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-primary-bright">Ventas</p>
-            <h2 className="font-display font-bold text-ink text-2xl">{facturaId ? 'Editar factura' : 'Nueva factura'}</h2>
+            <p className="text-sm text-muted">Ventas</p>
+            <h1 className="font-display font-semibold text-ink text-2xl">{facturaId ? 'Editar factura' : 'Nueva factura'}</h1>
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1.5 text-sm text-muted">
-            <span className="h-2.5 w-2.5 rounded-full bg-primary-bright" />
+            <span className="h-2 w-2 rounded-full bg-primary-bright" aria-hidden="true" />
             {items.length} líneas · {itemCount} unidades
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.6fr_0.9fr]">
+        <div className="grid gap-4 xl:grid-cols-[1.6fr_0.9fr]">
           <div className="space-y-4">
             {/* Disparador del buscador: ya no empuja contenido, abre el modal */}
             <button
+              ref={triggerRef}
               type="button"
+              aria-haspopup="dialog"
+              aria-expanded={buscadorAbierto}
               onClick={() => {
                 setBusqueda('')
                 setBuscadorAbierto(true)
                 requestAnimationFrame(() => inputRef.current?.focus())
               }}
-              className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-2/80 px-4 py-3 text-left text-muted transition hover:border-primary-bright/60 hover:bg-surface"
+              className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border bg-surface-2/70 px-4 py-3 text-left text-muted transition-colors hover:border-primary-bright/50 hover:bg-surface"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="9" cy="9" r="6" />
                 <path d="m17 17-3.5-3.5" strokeLinecap="round" />
               </svg>
               <span className="text-sm">Buscar y agregar producto…</span>
-              <span className="ml-auto rounded-md border border-border bg-background/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
-                Click
-              </span>
             </button>
 
             <div className="flex flex-col gap-2">
               {items.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border bg-surface-2/70 p-8 text-center text-muted">
+                <div className="rounded-xl border border-border bg-surface-2/50 p-8 text-center text-sm text-muted">
                   Aún no agregas productos. Usa el buscador para empezar la venta.
                 </div>
               ) : (
@@ -206,11 +200,10 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
                   return (
                     <div
                       key={index}
-                      className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-2/80 px-3 py-2.5 lg:flex-row lg:items-center lg:gap-3"
+                      className="rounded-xl border border-border/70 bg-surface-2/55 p-3 sm:p-4"
                     >
-                      {/* Línea 1 en mobile: imagen + nombre + quitar. En desktop se une a la fila completa. */}
-                      <div className="flex items-center gap-3 lg:contents">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-2 sm:gap-3">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-background/60">
                           {producto?.imagen_url ? (
                             <Image
                               src={producto.imagen_url}
@@ -221,76 +214,123 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-full items-center justify-center text-[9px] text-muted">IMG</div>
+                            <div className="flex h-full items-center justify-center text-muted">
+                              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                                <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+                                <path d="m4.2 7.6 7.8 4.5 7.8-4.5M12 12.1V21" />
+                              </svg>
+                            </div>
                           )}
                         </div>
 
-                        <div className="min-w-0 flex-1">
-                          <select
-                            className={selectClass}
-                            style={selectChevronStyle}
-                            value={item.id_producto}
-                            onChange={(e) => actualizarLinea(index, { id_producto: e.target.value })}
+                        <Select.Root
+                          value={item.id_producto}
+                          onValueChange={(id_producto) => actualizarLinea(index, { id_producto })}
+                        >
+                          <Select.Trigger
+                            aria-label={`Producto de la línea ${index + 1}`}
+                            className="group flex min-h-11 min-w-0 w-full items-center justify-between gap-2 rounded-lg border border-border/70 bg-background/50 px-3 text-left text-base font-semibold text-ink transition-colors hover:border-primary-bright/50 hover:bg-background/70 focus-visible:outline-2 focus-visible:outline-primary-bright focus-visible:outline-offset-2 sm:text-sm"
                           >
-                            {productos.map((p) => (
-                              <option key={p.id} value={p.id}>{p.nombre}</option>
-                            ))}
-                          </select>
-                          <span className="mt-1 block text-xs text-muted">${precioUnitario.toLocaleString('es-CO')} c/u</span>
-                        </div>
+                            <Select.Value className="truncate" />
+                            <Select.Icon className="shrink-0 text-muted transition-transform duration-150 group-data-[state=open]:rotate-180">
+                              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
+                                <path d="m5 8 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </Select.Icon>
+                          </Select.Trigger>
+                          <Select.Portal>
+                            <Select.Content
+                              position="popper"
+                              align="start"
+                              sideOffset={6}
+                              className="z-[1100] w-[max(var(--radix-select-trigger-width),16rem)] max-w-[calc(100vw-2rem)] max-h-[min(60vh,24rem)] overflow-y-auto rounded-xl border border-border bg-surface p-1 shadow-xl shadow-black/30"
+                            >
+                              <Select.Viewport className="flex flex-col gap-1 p-0.5">
+                                {productos.map((p) => (
+                                  <Select.Item
+                                    key={p.id}
+                                    value={p.id}
+                                    textValue={p.nombre}
+                                    className="product-select-option relative flex min-h-11 cursor-pointer select-none items-center rounded-lg px-3 py-2 pr-10 text-sm text-ink"
+                                  >
+                                    <Select.ItemText>{p.nombre}</Select.ItemText>
+                                    <Select.ItemIndicator className="absolute right-3 text-primary-bright">
+                                      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                                        <path d="m4 10 4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                    </Select.ItemIndicator>
+                                  </Select.Item>
+                                ))}
+                              </Select.Viewport>
+                            </Select.Content>
+                          </Select.Portal>
+                        </Select.Root>
 
                         <button
                           type="button"
                           onClick={() => quitarLinea(index)}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-danger transition hover:bg-danger/10 lg:order-last"
-                          aria-label="Quitar línea"
+                          className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                          aria-label={`Quitar ${producto?.nombre ?? 'producto'} de la factura`}
                         >
-                          ✕
+                          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
+                            <path d="m6 6 8 8M14 6l-8 8" strokeLinecap="round" />
+                          </svg>
                         </button>
                       </div>
 
-                      {/* Línea 2 en mobile: tipo, cantidad y subtotal. En desktop se une a la fila completa. */}
-                      <div className="flex items-center justify-between gap-3 pl-[52px] lg:contents lg:pl-0">
-                        {/* Toggle Detal / Mayor */}
-                        <div className="flex shrink-0 items-center rounded-lg border border-border bg-background/60 p-0.5 text-xs">
+                      <div className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-2 border-t border-border/70 pt-3 md:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-x-4">
+                        <div role="group" aria-label={`Tipo de venta de ${producto?.nombre ?? 'producto'}`} className="flex items-center rounded-lg bg-background/60 p-0.5 text-xs">
                           <button
                             type="button"
                             onClick={() => actualizarLinea(index, { tipo_venta: 'detal' })}
-                            className={`rounded-md px-2 py-1 transition ${item.tipo_venta === 'detal' ? 'bg-primary-bright text-background font-semibold' : 'text-muted'}`}
+                            aria-pressed={item.tipo_venta === 'detal'}
+                            className={`min-h-11 rounded-md px-2.5 transition-colors ${item.tipo_venta === 'detal' ? 'bg-primary-bright text-background font-semibold' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
                           >
                             Detal
                           </button>
                           <button
                             type="button"
                             onClick={() => actualizarLinea(index, { tipo_venta: 'mayor' })}
-                            className={`rounded-md px-2 py-1 transition ${item.tipo_venta === 'mayor' ? 'bg-primary-bright text-background font-semibold' : 'text-muted'}`}
+                            aria-pressed={item.tipo_venta === 'mayor'}
+                            className={`min-h-11 rounded-md px-2.5 transition-colors ${item.tipo_venta === 'mayor' ? 'bg-primary-bright text-background font-semibold' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
                           >
                             Mayor
                           </button>
                         </div>
 
-                        {/* Stepper de cantidad */}
-                        <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background/60 px-1.5 py-1">
+                        <div className="min-w-0 text-right md:text-left">
+                          <span className="block text-[11px] leading-4 text-muted">Precio unitario</span>
+                          <span className="block whitespace-nowrap text-xs font-medium tabular-nums text-ink sm:text-sm">
+                            ${precioUnitario.toLocaleString('es-CO')}
+                          </span>
+                        </div>
+
+                        <div role="group" aria-label={`Cantidad de ${producto?.nombre ?? 'producto'}`} className="flex w-fit items-center gap-0.5 rounded-lg bg-background/60 p-0.5">
                           <button
                             type="button"
                             onClick={() => cambiarCantidad(index, -1)}
-                            className="flex h-5 w-5 items-center justify-center rounded text-muted hover:text-ink"
+                            aria-label={`Reducir cantidad de ${producto?.nombre ?? 'producto'}`}
+                            className="flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                           >
                             −
                           </button>
-                          <span className="w-5 text-center text-sm font-medium text-ink">{item.cantidad}</span>
+                          <span className="w-5 text-center text-sm font-medium tabular-nums text-ink">{item.cantidad}</span>
                           <button
                             type="button"
                             onClick={() => cambiarCantidad(index, 1)}
-                            className="flex h-5 w-5 items-center justify-center rounded text-muted hover:text-ink"
+                            aria-label={`Aumentar cantidad de ${producto?.nombre ?? 'producto'}`}
+                            className="flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-2 hover:text-ink"
                           >
                             +
                           </button>
                         </div>
 
-                        <span className="w-20 shrink-0 text-right text-sm font-bold text-primary-bright">
-                          ${subtotal.toLocaleString('es-CO')}
-                        </span>
+                        <div className="min-w-0 text-right">
+                          <span className="block text-[11px] leading-4 text-muted">Subtotal</span>
+                          <span className="block whitespace-nowrap text-xs font-semibold tabular-nums text-primary-bright sm:text-sm">
+                            ${subtotal.toLocaleString('es-CO')}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )
@@ -299,10 +339,10 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
             </div>
           </div>
 
-          <aside className="rounded-2xl border border-border bg-surface-2/80 p-5 shadow-[0_20px_40px_rgba(17,24,39,0.25)]">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted">Resumen</p>
+          <aside className="rounded-xl border border-border bg-surface-2/70 p-5">
+            <p className="text-sm font-medium text-muted">Resumen</p>
             <div className="mt-4 space-y-4">
-              <div className="rounded-xl border border-border bg-background/60 p-4">
+              <div className="rounded-lg border border-border bg-background/60 p-4">
                 <p className="text-sm text-muted">Total estimado</p>
                 <p className="mt-2 text-3xl font-display font-bold text-ink">${total.toLocaleString('es-CO')}</p>
               </div>
@@ -326,7 +366,7 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
         </div>
       </div>
 
-      {mensaje && <p className="text-danger text-sm">{mensaje}</p>}
+      {mensaje && <p role="alert" className="text-danger text-sm">{mensaje}</p>}
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <button type="button" onClick={guardar} disabled={guardando || items.length === 0} className="btn-secondary flex-1">
@@ -340,11 +380,31 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
       {/* Modal de búsqueda de productos */}
       {buscadorAbierto && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[10vh] backdrop-blur-sm"
-          onClick={() => setBuscadorAbierto(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="buscar-producto-titulo"
+          tabIndex={-1}
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[10vh]"
+          onClick={cerrarBuscador}
+          onKeyDown={(event) => {
+            if (event.key !== 'Tab') return
+            const elementos = event.currentTarget.querySelectorAll<HTMLElement>(
+              'input:not(:disabled), button:not(:disabled)'
+            )
+            const primero = elementos[0]
+            const ultimo = elementos[elementos.length - 1]
+            if (!primero || !ultimo) return
+            if (event.shiftKey && document.activeElement === primero) {
+              event.preventDefault()
+              ultimo.focus()
+            } else if (!event.shiftKey && document.activeElement === ultimo) {
+              event.preventDefault()
+              primero.focus()
+            }
+          }}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-border bg-surface shadow-[0_30px_60px_rgba(0,0,0,0.4)]"
+            className="w-full max-w-lg rounded-xl border border-border bg-surface"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
@@ -352,20 +412,23 @@ export default function NuevaFactura({ productos, facturaId, itemsIniciales }: P
                 <circle cx="9" cy="9" r="6" />
                 <path d="m17 17-3.5-3.5" strokeLinecap="round" />
               </svg>
+              <h2 id="buscar-producto-titulo" className="sr-only">Buscar producto para agregar</h2>
               <input
                 ref={inputRef}
                 type="text"
-                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted"
+                autoFocus
+                aria-label="Nombre del producto"
+                className="min-h-11 w-full bg-transparent text-sm text-ink placeholder:text-muted focus-visible:outline-2 focus-visible:outline-primary-bright focus-visible:outline-offset-2"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Escribe el nombre del producto"
               />
               <button
                 type="button"
-                onClick={() => setBuscadorAbierto(false)}
-                className="rounded-md border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted hover:text-ink"
+                onClick={cerrarBuscador}
+                className="min-h-11 min-w-11 rounded-md border border-border px-2 text-xs text-muted transition-colors hover:text-ink"
               >
-                Esc
+                Cerrar
               </button>
             </div>
 

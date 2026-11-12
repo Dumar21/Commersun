@@ -1,40 +1,49 @@
+import PageLoading from '@/components/ui/PageLoading'
 import Skeleton from '@/components/ui/Skeleton'
 
 export default function VentasLoading() {
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-3 w-32" />
-          <Skeleton className="h-9 w-48" />
+    <PageLoading className="mx-auto max-w-7xl space-y-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-8 w-40" />
         </div>
-        <Skeleton className="h-11 w-36 rounded-xl" />
+        <Skeleton className="h-11 w-full rounded-lg sm:w-40" />
       </div>
 
-      <div className="card overflow-hidden p-0 border-white/5">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-surface/90">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border/60 bg-white/[0.02] text-left">
-                <th className="px-6 py-4"><Skeleton className="h-3 w-24" /></th>
-                <th className="px-6 py-4"><Skeleton className="h-3 w-24" /></th>
-                <th className="px-6 py-4"><Skeleton className="h-3 w-28" /></th>
-                <th className="px-6 py-4"></th>
+              <tr className="border-b border-border/70 bg-surface-2/60 text-left">
+                <th className="px-5 py-3.5"><Skeleton className="h-3 w-20" /></th>
+                <th className="px-5 py-3.5"><Skeleton className="h-3 w-16" /></th>
+                <th className="px-5 py-3.5"><Skeleton className="h-3 w-16" /></th>
+                <th className="px-5 py-3.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <tr key={i}>
-                  <td className="px-6 py-4"><Skeleton className="h-4 w-36" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
-                  <td className="px-6 py-4"><Skeleton className="h-6 w-24 rounded-lg" /></td>
-                  <td className="px-6 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+            <tbody className="divide-y divide-border/35">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <tr key={item}>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-4 w-36" />
+                        <Skeleton className="h-3 w-28" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5"><Skeleton className="h-4 w-24" /></td>
+                  <td className="px-5 py-3.5"><Skeleton className="h-6 w-24 rounded-md" /></td>
+                  <td className="px-5 py-3.5"><Skeleton className="ml-auto h-4 w-16" /></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+    </PageLoading>
   )
 }

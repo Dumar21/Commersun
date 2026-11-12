@@ -26,14 +26,6 @@ const ETIQUETAS_ROL: Record<Rol, string> = {
   bodegero: 'Bodeguero',
 }
 
-const COLORES_ROL: Record<Rol, string> = {
-  super_admin: 'border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-200',
-  dueno: 'border-primary-bright/20 bg-primary-bright/10 text-primary-bright',
-  vendedor: 'border-sky-400/20 bg-sky-400/10 text-sky-200',
-  cajero: 'border-accent/20 bg-accent/10 text-accent-bright',
-  bodegero: 'border-amber-400/20 bg-amber-400/10 text-amber-200',
-}
-
 const ROLES_POR_ROL: Record<Rol, Rol[]> = {
   super_admin: ['dueno', 'vendedor', 'cajero', 'bodegero'],
   dueno: ['vendedor', 'cajero', 'bodegero'],
@@ -112,32 +104,34 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
 
   return (
     <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Resumen de usuarios">
-        {[
-          { label: 'Cuentas registradas', value: usuarios.length, accent: 'text-ink', icon: 'M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 8v6m3-3h-6', iconColor: 'text-primary-bright bg-primary/10 border-primary-bright/15' },
-          { label: 'Acceso activo', value: usuariosActivos, accent: 'text-accent-bright', icon: 'm5 12 4 4L19 6', iconColor: 'text-accent-bright bg-accent/10 border-accent/15' },
-          { label: 'Desactivados', value: usuariosInactivos, accent: 'text-muted', icon: 'M6 6l12 12M18 6 6 18', iconColor: 'text-muted bg-white/[0.04] border-white/[0.08]' },
-        ].map((stat) => (
-          <div key={stat.label} className="flex items-center gap-4 rounded-2xl border border-border/80 bg-surface/75 px-5 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${stat.iconColor}`}>
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                <path d={stat.icon} strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <div>
-              <p className="text-xs font-medium text-muted">{stat.label}</p>
-              <p className={`mt-0.5 text-2xl font-display font-bold ${stat.accent}`}>{stat.value}</p>
+      <section className="overflow-hidden rounded-xl border border-border/80 bg-surface/75" aria-label="Resumen de usuarios">
+        <dl className="grid grid-cols-1 divide-y divide-border/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {[
+            { label: 'Cuentas registradas', value: usuarios.length, icon: 'M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 8v6m3-3h-6' },
+            { label: 'Acceso activo', value: usuariosActivos, icon: 'm5 12 4 4L19 6' },
+            { label: 'Desactivados', value: usuariosInactivos, icon: 'M6 6l12 12M18 6 6 18' },
+          ].map((stat) => (
+            <div key={stat.label} className="flex items-center gap-3 px-5 py-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center text-muted">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  <path d={stat.icon} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <dt className="text-xs text-muted">{stat.label}</dt>
+                <dd className="mt-0.5 text-xl font-semibold tabular-nums text-ink">{stat.value}</dd>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </dl>
       </section>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
-        <section className="overflow-hidden rounded-2xl border border-border/80 bg-surface/80 shadow-[0_18px_45px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <section className="overflow-hidden rounded-xl border border-border/80 bg-surface/90">
           <div className="flex flex-col gap-4 border-b border-border/70 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-lg font-display font-bold text-ink">Miembros del equipo</h2>
+                <h2 className="text-lg font-display font-semibold text-ink">Miembros del equipo</h2>
                 <span className="rounded-full border border-border bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-muted">
                   {usuarios.length}
                 </span>
@@ -162,8 +156,8 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
 
           <div className="p-4 sm:p-5">
             {usuarios.length === 0 ? (
-              <div className="flex flex-col items-center rounded-xl border border-dashed border-border px-6 py-12 text-center">
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary-bright">
+              <div className="flex flex-col items-center rounded-lg border border-border px-6 py-12 text-center">
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-6 w-6">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6m3-3h-6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -172,7 +166,7 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
                 <p className="mt-1 max-w-xs text-sm text-muted">Crea una cuenta para invitar a tu equipo y asignarle un rol.</p>
               </div>
             ) : usuariosFiltrados.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border px-6 py-10 text-center">
+              <div className="rounded-lg border border-border px-6 py-10 text-center">
                 <p className="font-medium text-ink">No encontramos coincidencias</p>
                 <p className="mt-1 text-sm text-muted">Prueba con otro nombre o rol.</p>
                 <button type="button" className="mt-3 text-xs font-bold text-primary-bright hover:text-ink" onClick={() => setBusqueda('')}>
@@ -180,7 +174,7 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
                 </button>
               </div>
             ) : (
-              <ul className="space-y-2.5">
+              <ul className="divide-y divide-border/70">
                 {usuariosFiltrados.map((usuario) => {
                   const puedeDesactivar =
                     usuario.id !== currentUserId && rolesPermitidos.includes(usuario.rol)
@@ -188,10 +182,10 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
                   return (
                     <li
                       key={usuario.id}
-                      className="group flex flex-col gap-4 rounded-xl border border-border/70 bg-surface-2/55 p-4 transition-colors hover:border-primary-bright/25 hover:bg-surface-2/80 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex min-w-0 items-center gap-3.5">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary-bright/15 bg-gradient-to-br from-primary/20 to-primary/5 text-sm font-bold uppercase text-primary-bright">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-sm font-semibold text-muted">
                           {usuario.nombre.trim().slice(0, 1)}
                           {usuario.nombre.trim().split(/\s+/).length > 1
                             ? usuario.nombre.trim().split(/\s+/).at(-1)?.slice(0, 1)
@@ -200,11 +194,11 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-ink">{usuario.nombre}</p>
                           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                            <span className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-bold tracking-wide ${COLORES_ROL[usuario.rol]}`}>
+                            <span className="inline-flex rounded-md border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium text-muted">
                               {ETIQUETAS_ROL[usuario.rol]}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${usuario.activo ? 'text-accent-bright' : 'text-muted'}`}>
-                              <span className={`h-1.5 w-1.5 rounded-full ${usuario.activo ? 'bg-accent-bright' : 'bg-muted/60'}`} />
+                            <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${usuario.activo ? 'text-accent-bright' : 'text-muted'}`}>
+                              <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${usuario.activo ? 'bg-accent-bright' : 'bg-muted/60'}`} />
                               {usuario.activo ? 'Activo' : 'Desactivado'}
                             </span>
                           </div>
@@ -212,7 +206,7 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
                       </div>
                       <button
                         type="button"
-                        className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-danger/15 px-3 py-2 text-xs font-semibold text-danger/90 transition hover:border-danger/35 hover:bg-danger/10 disabled:cursor-not-allowed disabled:border-border/60 disabled:bg-transparent disabled:text-muted/60 disabled:opacity-70 sm:self-auto"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-lg border border-danger/20 px-3 py-2 text-xs font-semibold text-danger/90 transition-colors hover:border-danger/40 hover:bg-danger/10 disabled:cursor-not-allowed disabled:border-border/60 disabled:bg-transparent disabled:text-muted/60 disabled:opacity-70 sm:self-auto"
                         disabled={cargando || !usuario.activo || !puedeDesactivar}
                         onClick={() => handleEliminar(usuario.id)}
                         title={
@@ -238,16 +232,16 @@ export default function UsuariosAdminPanel({ currentRol, currentUserId, usuarios
           </div>
         </section>
 
-        <aside className="overflow-hidden rounded-2xl border border-primary-bright/20 bg-surface/85 shadow-[0_18px_45px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-          <div className="border-b border-border/70 bg-gradient-to-r from-primary/15 to-transparent px-5 py-5 sm:px-6">
+        <aside className="overflow-hidden rounded-xl border border-border/80 bg-surface/90">
+          <div className="border-b border-border/70 px-5 py-5 sm:px-6">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary-bright/20 bg-primary/15 text-primary-bright">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-2 text-muted">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
                   <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
                 </svg>
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-ink">Agregar usuario</h2>
+                <h2 className="font-display text-base font-semibold text-ink">Agregar usuario</h2>
                 <p className="mt-0.5 text-xs text-muted">Crea un nuevo acceso para tu equipo.</p>
               </div>
             </div>

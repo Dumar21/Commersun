@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "skills": {
+    "noslop-frontend": {
+      "source": "lidge-jun/noslopdesign",
+      "sourceType": "github",
+      "skillPath": "skills/noslop-frontend/SKILL.md",
+      "computedHash": "dae4f160ac490dd64a5620649861c6453789b48f9eef45d20460c99a1762ae2f",
+      "installMode": "copy"
+    },
+    "noslop-uiux": {
+      "source": "lidge-jun/noslopdesign",
+      "sourceType": "github",
+      "skillPath": "skills/noslop-uiux/SKILL.md",
+      "computedHash": "2c15833ceee066efc07add8bca652443a215daec7d4311a40da04d044e0d23b8",
+      "installMode": "copy"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+
+TIER="${NOSLOP_TIER:-${1:-fast}}"
+
+case "$TIER" in
+  fast)
+    npm run lint
+    ;;
+  slow)
+    npm run typecheck
+    ;;
+  ci)
+    npm run ci
+    ;;
+  *)
+    echo "Unknown tier: $TIER — use: fast, slow, or ci" >&2
+    exit 1
+    ;;
+esac
